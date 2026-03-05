@@ -590,7 +590,7 @@ async function loadProfile(uid, email) {
 
 function startApp() {
   hide('auth');
-  show('app');
+  gel('app').style.display = 'block';
   // Header
   const initials = (me.email || '?')[0].toUpperCase();
   gel('user-av').textContent = initials;
@@ -605,7 +605,7 @@ function startApp() {
 
 function logout() {
   token = null; me = null; event_ = null;
-  hide('app'); show('auth');
+  hide('app'); gel('auth').style.display = 'flex';
   gel('v-login').style.display = 'block'; hide('v-register');
 }
 
@@ -1130,7 +1130,11 @@ document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e
 const gel = id => document.getElementById(id);
 const val = id => (gel(id)?.value || '').trim();
 const set = (id, v) => { const el = gel(id); if (el) el.value = v; };
-const show = id => { const el = gel(id); if (el) el.style.display = 'block'; };
+const show = id => {
+  const el = gel(id); if (!el) return;
+  // auth et app utilisent flex, le reste block
+  el.style.display = (id === 'auth' || id === 'app') ? 'flex' : 'block';
+};
 const hide = id => { const el = gel(id); if (el) el.style.display = 'none'; };
 const dis  = (id, d) => { const el = gel(id); if (el) el.disabled = d; };
 const clearForm = ids => ids.forEach(id => set(id, ''));
