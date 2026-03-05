@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventOps Outdoor</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ──────────────────────────────────────────────── */
+:root {
+  --bg:       #0D1117;
+  --surface:  #161B22;
+  --surface2: #21262D;
+  --border:   #30363D;
+  --text:     #E6EDF3;
+  --muted:    #8B949E;
+  --primary:  #F97316;
+  --pdim:     rgba(249,115,22,.15);
+  --green:    #22C55E;  --gdim: rgba(34,197,94,.12);
+  --red:      #EF4444;  --rdim: rgba(239,68,68,.12);
+  --blue:     #3B82F6;  --bdim: rgba(59,130,246,.12);
+  --yellow:   #EAB308;  --ydim: rgba(234,179,8,.12);
+  --fh: 'Syne', sans-serif;
+  --fb: 'DM Sans', sans-serif;
+  --radius: 10px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--fb); min-height: 100vh; font-size: 14px; }
+
+/* ── AUTH ────────────────────────────────────────────────── */
+#auth {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 30% 50%, rgba(249,115,22,.07) 0%, transparent 60%), var(--bg);
+}
+.auth-box {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  padding: 44px; width: 100%; max-width: 400px;
+}
+.auth-logo { font-family: var(--fh); font-size: 22px; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
+.auth-logo span { display: block; font-size: 12px; font-weight: 400; color: var(--muted); margin-top: 2px; }
+.auth-title { font-family: var(--fh); font-size: 18px; font-weight: 700; margin: 28px 0 20px; }
+
+/* ── FORM ELEMENTS ───────────────────────────────────────── */
+.field { margin-bottom: 14px; }
+label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px; }
+input, select, textarea {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-family: var(--fb); font-size: 14px;
+  padding: 9px 13px; outline: none; transition: border-color .15s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+textarea { resize: vertical; min-height: 70px; }
+select option { background: var(--surface2); }
+
+/* ── BUTTONS ─────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: none; border-radius: 8px; font-family: var(--fb); font-size: 13px;
+  font-weight: 500; cursor: pointer; padding: 9px 16px;
+  transition: all .15s; white-space: nowrap; text-decoration: none;
+}
+.btn-primary  { background: var(--primary); color: #fff; }
+.btn-primary:hover  { background: #ea6b0e; }
+.btn-ghost    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-ghost:hover    { color: var(--text); border-color: var(--muted); }
+.btn-danger   { background: var(--rdim); color: var(--red); border: 1px solid rgba(239,68,68,.3); }
+.btn-danger:hover   { background: rgba(239,68,68,.2); }
+.btn-success  { background: var(--gdim); color: var(--green); border: 1px solid rgba(34,197,94,.3); }
+.btn-success:hover  { background: rgba(34,197,94,.2); }
+.btn-blue     { background: var(--bdim); color: var(--blue); border: 1px solid rgba(59,130,246,.3); }
+.btn-full     { width: 100%; justify-content: center; padding: 11px; font-size: 14px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ── APP LAYOUT ──────────────────────────────────────────── */
+#app { display: none; }
+.sidebar {
+  position: fixed; top: 0; left: 0; width: 224px; height: 100vh;
+  background: var(--surface); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; z-index: 100; overflow-y: auto;
+}
+.sb-logo { padding: 20px 16px 16px; border-bottom: 1px solid var(--border); }
+.sb-logo-main { font-family: var(--fh); font-size: 16px; font-weight: 800; color: var(--primary); }
+.sb-logo-sub  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.sb-nav { flex: 1; padding: 10px 8px; display: flex; flex-direction: column; gap: 1px; }
+.nav-sep { height: 1px; background: var(--border); margin: 6px 0; }
+.nav-label { padding: 6px 10px 2px; font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.nav-btn {
+  display: flex; align-items: center; gap: 9px; padding: 8px 10px;
+  border-radius: 7px; border: none; background: none; color: var(--muted);
+  font-family: var(--fb); font-size: 13px; font-weight: 500;
+  cursor: pointer; width: 100%; text-align: left; transition: all .12s;
+}
+.nav-btn:hover  { background: var(--surface2); color: var(--text); }
+.nav-btn.active { background: var(--pdim); color: var(--primary); }
+.nav-icon { font-size: 15px; flex-shrink: 0; }
+.nav-badge { margin-left: auto; background: var(--primary); color: #fff; border-radius: 99px; padding: 1px 6px; font-size: 11px; }
+.sb-footer { padding: 12px 8px; border-top: 1px solid var(--border); }
+.user-chip { display: flex; align-items: center; gap: 9px; padding: 8px 10px; background: var(--surface2); border-radius: 8px; margin-bottom: 8px; }
+.user-av { width: 30px; height: 30px; border-radius: 50%; background: var(--pdim); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--primary); flex-shrink: 0; }
+.user-name { font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-role { font-size: 11px; color: var(--muted); }
+
+.main { margin-left: 224px; padding: 28px 32px; min-height: 100vh; }
+
+/* ── PAGES ───────────────────────────────────────────────── */
+.page { display: none; }
+.page.active { display: block; animation: fadeUp .18s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── PAGE HEADER ─────────────────────────────────────────── */
+.page-hd { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+.page-hd-left .breadcrumb { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.page-hd-left .breadcrumb a { color: var(--primary); cursor: pointer; text-decoration: none; }
+.page-hd-left .breadcrumb a:hover { text-decoration: underline; }
+.page-title { font-family: var(--fh); font-size: 24px; font-weight: 800; line-height: 1.1; }
+.page-sub { color: var(--muted); font-size: 13px; margin-top: 3px; }
+.page-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; }
+
+/* ── CARDS ───────────────────────────────────────────────── */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 14px; }
+.card-title { font-family: var(--fh); font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--text); }
+
+/* ── STATS ROW ───────────────────────────────────────────── */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
+.stat-val { font-family: var(--fh); font-size: 30px; font-weight: 800; color: var(--primary); line-height: 1; }
+.stat-lbl { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .05em; }
+
+/* ── EVENTS GRID ─────────────────────────────────────────── */
+.events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.event-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 18px; cursor: pointer; transition: all .15s; position: relative; overflow: hidden;
+}
+.event-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--primary); }
+.event-card:hover { border-color: rgba(249,115,22,.5); box-shadow: 0 4px 20px rgba(0,0,0,.3); }
+.ec-name { font-family: var(--fh); font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.ec-meta { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 3px; }
+.ec-actions { display: flex; gap: 6px; margin-top: 12px; }
+
+/* ── TABLE ───────────────────────────────────────────────── */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border); font-weight: 600; }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(48,54,61,.4); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(33,38,45,.5); }
+.td-actions { display: flex; gap: 5px; }
+
+/* ── BADGES ──────────────────────────────────────────────── */
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+.b-draft     { background: rgba(139,148,158,.15); color: var(--muted); }
+.b-published { background: var(--gdim); color: var(--green); }
+.b-done      { background: var(--bdim); color: var(--blue); }
+.b-admin     { background: var(--pdim); color: var(--primary); }
+.b-org       { background: var(--bdim); color: var(--blue); }
+.b-confirmed { background: var(--gdim); color: var(--green); }
+.b-declined  { background: var(--rdim); color: var(--red); }
+.b-pending   { background: var(--ydim); color: var(--yellow); }
+
+/* ── PROGRESS ────────────────────────────────────────────── */
+.prog { background: var(--surface2); border-radius: 99px; height: 5px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 99px; background: var(--primary); transition: width .3s; }
+.prog-fill.full { background: var(--green); }
+
+/* ── MODAL ───────────────────────────────────────────────── */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 400; display: none; align-items: center; justify-content: center; padding: 20px; }
+.overlay.open { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+.modal-lg { max-width: 640px; }
+.modal-title { font-family: var(--fh); font-size: 17px; font-weight: 700; margin-bottom: 20px; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+.modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.modal-grid .full { grid-column: 1 / -1; }
+
+/* ── ALERTS ──────────────────────────────────────────────── */
+.alert { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; }
+.alert-error   { background: var(--rdim); color: var(--red);    border: 1px solid rgba(239,68,68,.3); }
+.alert-info    { background: var(--bdim); color: var(--blue);   border: 1px solid rgba(59,130,246,.3); }
+.alert-success { background: var(--gdim); color: var(--green);  border: 1px solid rgba(34,197,94,.3); }
+
+/* ── EMPTY STATE ─────────────────────────────────────────── */
+.empty { text-align: center; padding: 48px 20px; color: var(--muted); }
+.empty .icon { font-size: 40px; margin-bottom: 12px; }
+.empty p { margin-bottom: 16px; }
+
+/* ── LINK BOX ────────────────────────────────────────────── */
+.link-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-family: monospace; font-size: 12px; color: var(--primary); word-break: break-all; margin: 12px 0; }
+
+/* ── TOAST ───────────────────────────────────────────────── */
+#toast { position: fixed; bottom: 22px; right: 22px; padding: 11px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; z-index: 9999; opacity: 0; transition: opacity .25s; pointer-events: none; }
+#toast.show { opacity: 1; }
+#toast.success { background: var(--green); color: #fff; }
+#toast.error   { background: var(--red);   color: #fff; }
+#toast.info    { background: var(--blue);  color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- ═══ AUTH ═══════════════════════════════════════════════ -->
+<div id="auth">
+  <!-- LOGIN -->
+  <div id="v-login" class="auth-box">
+    <div class="auth-logo">⚡ EventOps Outdoor <span>Espace organisateur</span></div>
+    <div class="auth-title">Connexion</div>
+    <div id="login-err" class="alert alert-error" style="display:none"></div>
+    <div class="field"><label>Email</label><input type="email" id="l-email" placeholder="vous@exemple.fr" onkeydown="if(event.key==='Enter')login()"></div>
+    <div class="field"><label>Mot de passe</label><input type="password" id="l-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()"></div>
+    <button class="btn btn-primary btn-full" id="l-btn" onclick="login()">Se connecter</button>
+    <div style="text-align:center; margin-top:14px;">
+      <button class="btn btn-ghost" onclick="show('v-register'); hide('v-login')" style="font-size:13px;">Créer un compte</button>
+    </div>
+  </div>
+  <!-- REGISTER -->
+  <div id="v-register" class="auth-box" style="display:none">
+    <div class="auth-logo">⚡ EventOps Outdoor <span>Créer un compte</span></div>
+    <div class="auth-title">Inscription</div>
+    <div id="reg-err" class="alert alert-error" style="display:none"></div>
+    <div class="field"><label>Email</label><input type="email" id="r-email" placeholder="vous@exemple.fr"></div>
+    <div class="field"><label>Mot de passe</label><input type="password" id="r-pwd" placeholder="Min. 6 caractères"></div>
+    <button class="btn btn-primary btn-full" id="r-btn" onclick="register()">Créer mon compte</button>
+    <div style="text-align:center; margin-top:14px;">
+      <button class="btn btn-ghost" onclick="show('v-login'); hide('v-register')" style="font-size:13px;">← Déjà un compte</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ APP ════════════════════════════════════════════════ -->
+<div id="app">
+  <nav class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-main">⚡ EventOps</div>
+      <div class="sb-logo-sub">Outdoor — Backoffice</div>
+    </div>
+    <div class="sb-nav">
+      <button class="nav-btn active" id="nb-dashboard"  onclick="nav('dashboard')"><span class="nav-icon">🏠</span>Tableau de bord</button>
+      <button class="nav-btn"        id="nb-events"     onclick="nav('events')"><span class="nav-icon">📅</span>Événements</button>
+
+      <!-- Navigation contextuelle événement -->
+      <div id="event-nav" style="display:none">
+        <div class="nav-sep"></div>
+        <div class="nav-label" id="event-nav-name">Événement</div>
+        <button class="nav-btn" id="nb-positions"  onclick="nav('positions')"><span class="nav-icon">📍</span>Postes</button>
+        <button class="nav-btn" id="nb-volunteers" onclick="nav('volunteers')"><span class="nav-icon">👥</span>Bénévoles</button>
+        <button class="nav-btn" id="nb-assignments" onclick="nav('assignments')"><span class="nav-icon">🔗</span>Affectations</button>
+        <button class="nav-btn" id="nb-confirmations" onclick="nav('confirmations')"><span class="nav-icon">✅</span>Confirmations</button>
+        <button class="nav-btn" id="nb-organizers" onclick="nav('organizers')" style="display:none"><span class="nav-icon">👤</span>Organisateurs</button>
+      </div>
+
+      <!-- Admin uniquement -->
+      <div id="admin-nav" style="display:none">
+        <div class="nav-sep"></div>
+        <div class="nav-label">Administration</div>
+        <button class="nav-btn" id="nb-users" onclick="nav('users')"><span class="nav-icon">⚙️</span>Utilisateurs</button>
+      </div>
+    </div>
+    <div class="sb-footer">
+      <div class="user-chip">
+        <div class="user-av" id="user-av">?</div>
+        <div>
+          <div class="user-name" id="user-email-display">—</div>
+          <div class="user-role" id="user-role-display">—</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost" style="width:100%; justify-content:center;" onclick="logout()">Déconnexion</button>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-hd">
+        <div class="page-hd-left"><div class="page-title">Tableau de bord</div><div class="page-sub">Vue globale de vos événements</div></div>
+        <div class="page-actions"><button class="btn btn-primary" onclick="openModal('m-event')">+ Nouvel événement</button></div>
+      </div>
+      <div class="stats" id="dash-stats"></div>
+      <div class="card"><div class="card-title">Événements récents</div><div id="dash-events"></div></div>
+    </div>
+
+    <!-- EVENTS -->
+    <div class="page" id="page-events">
+      <div class="page-hd">
+        <div class="page-hd-left"><div class="page-title">Événements</div></div>
+        <div class="page-actions"><button class="btn btn-primary" onclick="openModal('m-event')">+ Nouvel événement</button></div>
+      </div>
+      <div id="events-list"></div>
+    </div>
+
+    <!-- POSITIONS -->
+    <div class="page" id="page-positions">
+      <div class="page-hd">
+        <div class="page-hd-left">
+          <div class="breadcrumb"><a onclick="nav('events')">Événements</a> / <span id="bc-pos-event"></span></div>
+          <div class="page-title">Postes</div>
+        </div>
+        <div class="page-actions"><button class="btn btn-primary" onclick="openModal('m-position')">+ Nouveau poste</button></div>
+      </div>
+      <div id="positions-list"></div>
+    </div>
+
+    <!-- VOLUNTEERS -->
+    <div class="page" id="page-volunteers">
+      <div class="page-hd">
+        <div class="page-hd-left">
+          <div class="breadcrumb"><a onclick="nav('events')">Événements</a> / <span id="bc-vol-event"></span></div>
+          <div class="page-title">Bénévoles</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-ghost" onclick="openModal('m-import')">📥 Import CSV</button>
+          <button class="btn btn-primary" onclick="openNewVolModal()">+ Ajouter</button>
+        </div>
+      </div>
+      <div class="card">
+        <input type="text" id="vol-search" placeholder="🔍  Rechercher..." oninput="filterVols()" style="margin-bottom:14px;">
+        <div id="volunteers-list"></div>
+      </div>
+    </div>
+
+    <!-- ASSIGNMENTS -->
+    <div class="page" id="page-assignments">
+      <div class="page-hd">
+        <div class="page-hd-left">
+          <div class="breadcrumb"><a onclick="nav('events')">Événements</a> / <span id="bc-asgn-event"></span></div>
+          <div class="page-title">Affectations</div>
+        </div>
+        <div class="page-actions"><button class="btn btn-primary" onclick="openNewAsgnModal()">+ Affecter</button></div>
+      </div>
+      <div class="stats" id="asgn-stats"></div>
+      <div class="card" id="asgn-body"></div>
+    </div>
+
+    <!-- CONFIRMATIONS -->
+    <div class="page" id="page-confirmations">
+      <div class="page-hd">
+        <div class="page-hd-left">
+          <div class="breadcrumb"><a onclick="nav('events')">Événements</a> / <span id="bc-conf-event"></span></div>
+          <div class="page-title">Confirmations</div>
+        </div>
+        <div class="page-actions"><button class="btn btn-ghost" onclick="loadConfirmations()">🔄 Actualiser</button></div>
+      </div>
+      <div class="stats" id="conf-stats"></div>
+      <div class="card" id="conf-body"></div>
+    </div>
+
+    <!-- ORGANIZERS -->
+    <div class="page" id="page-organizers">
+      <div class="page-hd">
+        <div class="page-hd-left">
+          <div class="breadcrumb"><a onclick="nav('events')">Événements</a> / <span id="bc-org-event"></span></div>
+          <div class="page-title">Co-organisateurs</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Assigner un co-organisateur</div>
+        <div class="alert alert-info">La personne doit d'abord créer un compte dans l'application.</div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+          <div style="flex:1; min-width:200px;" class="field"><label>Email du co-organisateur</label><input type="email" id="org-email" placeholder="co-organisateur@exemple.fr"></div>
+          <button class="btn btn-primary" style="margin-bottom:14px;" onclick="addOrganizer()">+ Assigner</button>
+        </div>
+      </div>
+      <div class="card"><div class="card-title">Équipe assignée</div><div id="organizers-list"></div></div>
+    </div>
+
+    <!-- USERS (admin) -->
+    <div class="page" id="page-users">
+      <div class="page-hd">
+        <div class="page-hd-left"><div class="page-title">Utilisateurs</div><div class="page-sub">Gestion des rôles</div></div>
+        <div class="page-actions"><button class="btn btn-ghost" onclick="loadUsers()">🔄 Actualiser</button></div>
+      </div>
+      <div class="card">
+        <input type="text" id="users-search" placeholder="🔍  Rechercher par email..." oninput="filterUsers()" style="margin-bottom:14px;">
+        <div id="users-list"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══ MODALS ══════════════════════════════════════════════ -->
+
+<!-- Event -->
+<div class="overlay" id="m-event">
+  <div class="modal modal-lg">
+    <div class="modal-title" id="m-event-title">Nouvel événement</div>
+    <input type="hidden" id="ev-id">
+    <div class="modal-grid">
+      <div class="field full"><label>Nom *</label><input type="text" id="ev-name" placeholder="SwimRun Verdon 2027"></div>
+      <div class="field full"><label>Description</label><textarea id="ev-desc" placeholder="Présentation de l'événement..."></textarea></div>
+      <div class="field full"><label>Lieu</label><input type="text" id="ev-loc" placeholder="Lac de Sainte-Croix, Verdon"></div>
+      <div class="field"><label>Date début</label><input type="date" id="ev-start"></div>
+      <div class="field"><label>Date fin</label><input type="date" id="ev-end"></div>
+      <div class="field full"><label>Statut</label>
+        <select id="ev-status">
+          <option value="brouillon">Brouillon</option>
+          <option value="publié">Publié</option>
+          <option value="terminé">Terminé</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-event')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveEvent()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Position -->
+<div class="overlay" id="m-position">
+  <div class="modal modal-lg">
+    <div class="modal-title" id="m-pos-title">Nouveau poste</div>
+    <input type="hidden" id="pos-id">
+    <div class="modal-grid">
+      <div class="field full"><label>Nom *</label><input type="text" id="pos-name" placeholder="Ravitaillement km10"></div>
+      <div class="field"><label>Type</label>
+        <select id="pos-type">
+          <option>Ravitaillement</option><option>Sécurité</option><option>Balisage</option>
+          <option>Signaleur</option><option>Parking</option><option>Arrivée</option>
+          <option>Accueil</option><option>Chronométrage</option><option>Médical</option><option>Autre</option>
+        </select>
+      </div>
+      <div class="field"><label>Bénévoles requis</label><input type="number" id="pos-count" value="1" min="1"></div>
+      <div class="field full"><label>Description / Instructions</label><textarea id="pos-desc"></textarea></div>
+      <div class="field full"><label>Matériel nécessaire</label><textarea id="pos-material" placeholder="Gilet jaune, talkie-walkie..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-position')">Annuler</button>
+      <button class="btn btn-primary" onclick="savePosition()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Volunteer -->
+<div class="overlay" id="m-volunteer">
+  <div class="modal">
+    <div class="modal-title" id="m-vol-title">Ajouter un bénévole</div>
+    <input type="hidden" id="vol-id">
+    <div class="field"><label>Nom complet *</label><input type="text" id="vol-name" placeholder="Jean Dupont"></div>
+    <div class="field"><label>Email</label><input type="email" id="vol-email" placeholder="jean@exemple.fr"></div>
+    <div class="field"><label>Téléphone</label><input type="tel" id="vol-phone" placeholder="06 12 34 56 78"></div>
+    <div class="field"><label>Notes</label><textarea id="vol-notes" placeholder="PSC1, permis bateau..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-volunteer')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveVolunteer()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import CSV -->
+<div class="overlay" id="m-import">
+  <div class="modal">
+    <div class="modal-title">Import CSV</div>
+    <div class="alert alert-info">Format attendu : <b>nom, email, telephone, notes</b><br>La 1ère ligne est ignorée si elle contient des en-têtes.</div>
+    <div class="field"><label>Fichier CSV</label><input type="file" id="csv-file" accept=".csv" onchange="previewCSV(this)"></div>
+    <div id="csv-preview" style="display:none; font-size:13px; color:var(--muted); margin-bottom:12px;"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-import')">Annuler</button>
+      <button class="btn btn-primary" id="import-btn" onclick="importCSV()" disabled>Importer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Assignment -->
+<div class="overlay" id="m-assignment">
+  <div class="modal">
+    <div class="modal-title">Affecter un bénévole</div>
+    <div class="field"><label>Bénévole *</label><select id="asgn-vol"></select></div>
+    <div class="field"><label>Poste *</label><select id="asgn-pos"></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('m-assignment')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveAssignment()">Affecter</button>
+    </div>
+  </div>
+</div>
+
+<!-- Link -->
+<div class="overlay" id="m-link">
+  <div class="modal">
+    <div class="modal-title">📨 Partager le lien</div>
+    <div id="link-info" style="font-size:14px; font-weight:600; margin-bottom:8px;"></div>
+    <div class="link-box" id="link-url"></div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:4px;">
+      <button class="btn btn-primary"  onclick="copyLink()">📋 Copier</button>
+      <button class="btn btn-success"  onclick="waLink()">💬 WhatsApp</button>
+      <button class="btn btn-ghost"    onclick="emailLink()">📧 Email</button>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('m-link')">Fermer</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ═══ SCRIPT ══════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ── CONFIG ────────────────────────────────────────────────
+const SB_URL  = 'https://zchybozcpzelmjqymudp.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjaHlib3pjcHplbG1qcXltdWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDE2MDAsImV4cCI6MjA4ODIxNzYwMH0.N2qnJgMNq5PzQ_42Pd7vgf47GmWVEQ8pBHMLKelLEp8';
+
+// ── STATE ─────────────────────────────────────────────────
+let token    = null;   // JWT session
+let me       = null;   // { id, email, role }
+let event_   = null;   // current event
+let _vols    = [];     // volunteers cache
+let _pos     = [];     // positions cache
+let _users   = [];     // users cache
+let _linkData = {};
+let _csvRows  = [];
+
+// ── API HELPERS ───────────────────────────────────────────
+async function api(path, method = 'GET', body = null, prefer = 'return=representation') {
+  const res = await fetch(SB_URL + path, {
+    method,
+    headers: {
+      'apikey':        SB_ANON,
+      'Authorization': `Bearer ${token || SB_ANON}`,
+      'Content-Type':  'application/json',
+      'Prefer':        prefer,
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const txt = await res.text();
+  if (!res.ok) throw new Error(txt);
+  return txt ? JSON.parse(txt) : [];
+}
+const dbGet  = (t, q = '') => api(`/rest/v1/${t}?${q}`);
+const dbPost = (t, d)       => api(`/rest/v1/${t}`, 'POST', d);
+const dbPatch= (t, q, d)    => api(`/rest/v1/${t}?${q}`, 'PATCH', d);
+const dbDel  = (t, q)       => api(`/rest/v1/${t}?${q}`, 'DELETE', null, '');
+
+// ── AUTH ──────────────────────────────────────────────────
+async function login() {
+  const email = val('l-email'), pwd = val('l-pwd');
+  if (!email || !pwd) return authErr('login-err', 'Email et mot de passe requis.');
+  dis('l-btn', true);
+  try {
+    const r = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: { 'apikey': SB_ANON, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pwd }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error_description || 'Identifiants incorrects.');
+    token = d.access_token;
+    await loadProfile(d.user.id, email);
+    startApp();
+  } catch (e) { authErr('login-err', e.message); }
+  finally { dis('l-btn', false); }
+}
+
+async function register() {
+  const email = val('r-email'), pwd = val('r-pwd');
+  if (!email || !pwd) return authErr('reg-err', 'Email et mot de passe requis.');
+  if (pwd.length < 6) return authErr('reg-err', 'Mot de passe trop court (min. 6 caractères).');
+  dis('r-btn', true);
+  try {
+    const r = await fetch(`${SB_URL}/auth/v1/signup`, {
+      method: 'POST',
+      headers: { 'apikey': SB_ANON, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pwd }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.msg || 'Erreur inscription.');
+    if (d.access_token) {
+      token = d.access_token;
+      await loadProfile(d.user.id, email);
+      startApp();
+    } else {
+      authErr('reg-err', '✅ Compte créé ! Connectez-vous maintenant.', false);
+      setTimeout(() => { show('v-login'); hide('v-register'); }, 2000);
+    }
+  } catch (e) { authErr('reg-err', e.message); }
+  finally { dis('r-btn', false); }
+}
+
+async function loadProfile(uid, email) {
+  try {
+    const rows = await dbGet('profiles', `id=eq.${uid}`);
+    if (rows.length) {
+      me = rows[0];
+    } else {
+      const ins = await dbPost('profiles', { id: uid, email, role: 'organisateur' });
+      me = Array.isArray(ins) ? ins[0] : ins;
+    }
+  } catch {
+    me = { id: uid, email, role: 'organisateur' };
+  }
+}
+
+function startApp() {
+  hide('auth');
+  show('app');
+  // Header
+  const initials = (me.email || '?')[0].toUpperCase();
+  gel('user-av').textContent = initials;
+  gel('user-email-display').textContent = me.email;
+  gel('user-role-display').textContent = me.role === 'admin' ? '⚡ Admin' : '🎯 Organisateur';
+  // Admin extras
+  if (me.role === 'admin') {
+    gel('admin-nav').style.display = 'block';
+  }
+  nav('dashboard');
+}
+
+function logout() {
+  token = null; me = null; event_ = null;
+  hide('app'); show('auth');
+  gel('v-login').style.display = 'block'; hide('v-register');
+}
+
+// ── NAVIGATION ────────────────────────────────────────────
+const PAGE_LOADERS = {
+  dashboard:     loadDashboard,
+  events:        loadEvents,
+  positions:     loadPositions,
+  volunteers:    loadVolunteers,
+  assignments:   loadAssignments,
+  confirmations: loadConfirmations,
+  organizers:    loadOrganizers,
+  users:         loadUsers,
+};
+
+function nav(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  gel('page-' + page)?.classList.add('active');
+  gel('nb-' + page)?.classList.add('active');
+  if (PAGE_LOADERS[page]) PAGE_LOADERS[page]();
+}
+
+function setEvent(ev) {
+  event_ = ev;
+  gel('event-nav').style.display = 'block';
+  const short = ev.name.length > 20 ? ev.name.substring(0, 20) + '…' : ev.name;
+  gel('event-nav-name').textContent = short;
+  // Organisateurs : visible seulement pour admin
+  gel('nb-organizers').style.display = me?.role === 'admin' ? 'flex' : 'none';
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const events = await getMyEvents();
+    const pub = events.filter(e => e.status === 'publié').length;
+    gel('dash-stats').innerHTML = `
+      <div class="stat"><div class="stat-val">${events.length}</div><div class="stat-lbl">Événements</div></div>
+      <div class="stat"><div class="stat-val" style="color:var(--green)">${pub}</div><div class="stat-lbl">Publiés</div></div>`;
+    gel('dash-events').innerHTML = events.length
+      ? '<div class="events-grid">' + events.slice(0, 6).map(eventCard).join('') + '</div>'
+      : emptyState('📅', 'Aucun événement', '<button class="btn btn-primary" onclick="openModal(\'m-event\')">+ Créer un événement</button>');
+  } catch (e) { gel('dash-stats').innerHTML = errHTML(e); }
+}
+
+// ── EVENTS ────────────────────────────────────────────────
+async function getMyEvents() {
+  if (me?.role === 'admin') return dbGet('events', 'order=start_date.asc');
+  // Organisateur : événements créés + événements assignés
+  const [owned, links] = await Promise.all([
+    dbGet('events', `user_id=eq.${me.id}&order=start_date.asc`),
+    dbGet('event_organizers', `user_id=eq.${me.id}`),
+  ]);
+  if (!links.length) return owned;
+  const ids = links.map(l => l.event_id).join(',');
+  const assigned = await dbGet('events', `id=in.(${ids})&order=start_date.asc`);
+  // Merge + deduplicate
+  const seen = new Set(owned.map(e => e.id));
+  return [...owned, ...assigned.filter(e => !seen.has(e.id))];
+}
+
+async function loadEvents() {
+  try {
+    const events = await getMyEvents();
+    gel('events-list').innerHTML = events.length
+      ? '<div class="events-grid">' + events.map(e => eventCard(e, true)).join('') + '</div>'
+      : emptyState('📅', 'Aucun événement', '<button class="btn btn-primary" onclick="openModal(\'m-event\')">+ Créer un événement</button>');
+  } catch (e) { gel('events-list').innerHTML = errHTML(e); }
+}
+
+function eventCard(e, withActions = false) {
+  const sc = { brouillon: 'b-draft', 'publié': 'b-published', 'terminé': 'b-done' }[e.status] || 'b-draft';
+  const d  = e.start_date ? new Date(e.start_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
+  const actions = withActions ? `
+    <div class="ec-actions">
+      <button class="btn btn-ghost" style="font-size:12px;padding:5px 10px" onclick="event.stopPropagation();editEvent('${e.id}')">✏️</button>
+      <button class="btn btn-danger" style="font-size:12px;padding:5px 10px" onclick="event.stopPropagation();deleteEvent('${e.id}')">🗑️</button>
+      <button class="btn btn-primary" style="font-size:12px;padding:5px 10px;flex:1" onclick="event.stopPropagation();goEvent('${e.id}')">Gérer →</button>
+    </div>` : '';
+  return `<div class="event-card" onclick="goEvent('${e.id}')">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+      <div class="ec-name">${esc(e.name)}</div>
+      <span class="badge ${sc}">${e.status}</span>
+    </div>
+    <div class="ec-meta">
+      <div>📅 ${d}</div>
+      <div>📍 ${esc(e.location || '—')}</div>
+    </div>
+    ${actions}
+  </div>`;
+}
+
+async function goEvent(id) {
+  const [ev] = await dbGet('events', `id=eq.${id}`);
+  if (ev) { setEvent(ev); nav('positions'); }
+}
+
+async function saveEvent() {
+  const id = val('ev-id');
+  const data = {
+    name: val('ev-name'), description: val('ev-desc'), location: val('ev-loc'),
+    start_date: val('ev-start') || null, end_date: val('ev-end') || null,
+    status: val('ev-status'),
+  };
+  if (!data.name.trim()) return toast('Le nom est obligatoire.', 'error');
+  try {
+    if (id) { await dbPatch('events', `id=eq.${id}`, data); }
+    else    { data.user_id = me.id; await dbPost('events', data); }
+    closeModal('m-event'); clearForm(['ev-id','ev-name','ev-desc','ev-loc','ev-start','ev-end']);
+    gel('m-event-title').textContent = 'Nouvel événement';
+    toast('Événement enregistré !', 'success');
+    loadEvents(); loadDashboard();
+  } catch (e) { toast('Erreur : ' + e.message, 'error'); }
+}
+
+async function editEvent(id) {
+  const [e] = await dbGet('events', `id=eq.${id}`);
+  set('ev-id', e.id); set('ev-name', e.name); set('ev-desc', e.description || '');
+  set('ev-loc', e.location || ''); set('ev-start', e.start_date || ''); set('ev-end', e.end_date || '');
+  set('ev-status', e.status);
+  gel('m-event-title').textContent = 'Modifier l\'événement';
+  openModal('m-event');
+}
+
+async function deleteEvent(id) {
+  if (!confirm('Supprimer cet événement et toutes ses données ?')) return;
+  try { await dbDel('events', `id=eq.${id}`); toast('Événement supprimé.', 'info'); loadEvents(); loadDashboard(); }
+  catch (e) { toast('Erreur : ' + e.message, 'error'); }
+}
+
+// ── POSITIONS ─────────────────────────────────────────────
+async function loadPositions() {
+  if (!event_) return;
+  gel('bc-pos-event').textContent = event_.name;
+  try {
+    _pos = await dbGet('positions', `event_id=eq.${event_.id}&order=name.asc`);
+    const el = gel('positions-list');
+    if (!_pos.length) { el.innerHTML = emptyState('📍', 'Aucun poste', '<button class="btn btn-primary" onclick="openModal(\'m-position\')">+ Créer un poste</button>'); return; }
+    el.innerHTML = _pos.map(p => `
+      <div class="card" style="margin-bottom:10px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <div>
+            <div style="font-family:var(--fh);font-size:15px;font-weight:700">${esc(p.name)}</div>
+            <div style="display:flex;gap:8px;margin-top:5px;flex-wrap:wrap">
+              <span class="badge b-draft">${esc(p.type || '—')}</span>
+              <span style="font-size:12px;color:var(--muted)">👥 ${p.required_count} bénévole(s) requis</span>
+            </div>
+            ${p.description ? `<div style="font-size:13px;color:var(--muted);margin-top:6px">${esc(p.description)}</div>` : ''}
+            ${p.material    ? `<div style="font-size:12px;color:var(--muted);margin-top:3px">🎒 ${esc(p.material)}</div>` : ''}
+          </div>
+          <div class="td-actions">
+            <button class="btn btn-ghost" style="font-size:12px;padding:5px 9px" onclick="editPosition('${p.id}')">✏️</button>
+            <button class="btn btn-danger" style="font-size:12px;padding:5px 9px" onclick="deletePosition('${p.id}')">🗑️</button>
+          </div>
+        </div>
+      </div>`).join('');
+  } catch (e) { gel('positions-list').innerHTML = errHTML(e); }
+}
+
+async function savePosition() {
+  if (!event_) return;
+  const id = val('pos-id');
+  const data = {
+    event_id: event_.id, name: val('pos-name'), type: val('pos-type'),
+    description: val('pos-desc'), material: val('pos-material'),
+    required_count: parseInt(val('pos-count')) || 1,
+  };
+  if (!data.name.trim()) return toast('Nom obligatoire.', 'error');
+  try {
+    if (id) await dbPatch('positions', `id=eq.${id}`, data);
+    else    await dbPost('positions', data);
+    closeModal('m-position'); clearForm(['pos-id','pos-name','pos-desc','pos-material']); set('pos-count', 1);
+    gel('m-pos-title').textContent = 'Nouveau poste';
+    toast('Poste enregistré !', 'success'); loadPositions();
+  } catch (e) { toast('Erreur : ' + e.message, 'error'); }
+}
+
+async function editPosition(id) {
+  const [p] = await dbGet('positions', `id=eq.${id}`);
+  set('pos-id', p.id); set('pos-name', p.name); set('pos-type', p.type || 'Autre');
+  set('pos-desc', p.description || ''); set('pos-material', p.material || ''); set('pos-count', p.required_count);
+  gel('m-pos-title').textContent = 'Modifier le poste';
+  openModal('m-position');
+}
+
+async function deletePosition(id) {
+  if (!confirm('Supprimer ce poste ?')) return;
+  try { await dbDel('positions', `id=eq.${id}`); toast('Poste supprimé.', 'info'); loadPositions(); }
+  catch (e) { toast('Erreur : ' + e.message, 'error'); }
+}
+
+// ── VOLUNTEERS ────────────────────────────────────────────
+async function loadVolunteers() {
+  if (!event_) return;
+  gel('bc-vol-event').textContent = event_.name;
+  try {
+    _vols = await dbGet('volunteers', `event_id=eq.${event_.id}&order=full_name.asc`);
+    renderVols(_vols);
+  } catch (e) { gel('volunteers-list').innerHTML = errHTML(e); }
+}
+
+function renderVols(list) {
+  const el = gel('volunteers-list');
+  if (!list.length) { el.innerHTML = emptyState('👥', 'Aucun bénévole'); return; }
+  el.innerHTML = `<div class="tbl-wrap"><table>
+    <thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Notes</th><th></th></tr></thead>
+    <tbody>${list.map(v => `<tr>
+      <td><b>${esc(v.full_name)}</b></td>
+      <td>${esc(v.email || '—')}</td>
+      <td>${esc(v.phone || '—')}</td>
+      <td style="color:var(--muted);font-size:12px">${esc(v.notes || '—')}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-ghost" style="font-size:11px;padding:4px 8px" onclick="editVol('${v.id}')">✏️</button>
+        <button class="btn btn-danger" style="font-size:11px;padding:4px 8px" onclick="deleteVol('${v.id}')">🗑️</button>
+      </div></td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
+
+function filterVols() {
+  const q = gel('vol-search').value.toLowerCase();
+  renderVols(_vols.filter(v => [v.full_name, v.email, v.phone, v.notes].some(s => (s || '').toLowerCase().includes(q))));
+}
+
+function openNewVolModal() {
+  clearForm(['vol-id','vol-name','vol-email','vol-phone','vol-notes']);
+  gel('m-vol-title').textContent = 'Ajouter un bénévole';
+  openModal('m-volunteer');
+}
+
+async function saveVolunteer() {
+  if (!event_) return;
+  const id = val('vol-id');
+  const data = {
+    event_id: event_.id, full_name: val('vol-name'),
+    email: val('vol-email') || null, phone: val('vol-phone') || null, notes: val('vol-notes') || null,
+  };
+  if (!data.full_name.trim()) return toast('Nom obligatoire.', 'error');
+  try {
+    if (id) await dbPatch('volunteers', `id=eq.${id}`, data);
+    else    await dbPost('volunteers', data);
+    closeModal('m-volunteer'); toast('Bénévole enregistré !', 'success'); loadVolunteers();
+  } catch (e) { toast('Erreur : ' + e.message, 'error'); }
+}
+
+async function editVol(id) {
+  const [v] = await dbGet('volunteers', `id=eq.${id}`);
+  set('vol-id', v.id); set('vol-name', v.full_name); set('vol-email', v.email || '');
+  set('vol-phone', v.phone || ''); set('vol-notes', v.notes || '');
+  gel('m-vol-title').textContent = 'Modifier le bénévole';
+  openModal('m-volunteer');
+}
+
+async function deleteVol(id) {
+  if (!confirm('Supprimer ce bénévole ?')) return;
+  try { await dbDel('volunteers', `id=eq.${id}`); toast('Supprimé.', 'info'); loadVolunteers(); }
+  catch (e) { toast('Erreur : ' + e.message, 'error'); }
+}
+
+// CSV
+function previewCSV(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const lines = ev.target.result.split('\n').filter(l => l.trim());
+    const start = lines[0].toLowerCase().includes('nom') ? 1 : 0;
+    _csvRows = [];
+    for (let i = start; i < lines.length; i++) {
+      const c = lines[i].split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+      if (c[0]) _csvRows.push({ full_name: c[0], email: c[1] || null, phone: c[2] || null, notes: c[3] || null });
+    }
+    gel('csv-preview').textContent = `${_csvRows.length} bénévole(s) détecté(s)`;
+    gel('csv-preview').style.display = 'block';
+    gel('import-btn').disabled = _csvRows.length === 0;
+  };
+  reader.readAsText(file);
+}
+
+async function importCSV() {
+  if (!event_ || !_csvRows.length) return;
+  try {
+    await dbPost('volunteers', _csvRows.map(r => ({ ...r, event_id: event_.id })));
+    closeModal('m-import'); toast(`${_csvRows.length} bénévoles importés !`, 'success');
+    _csvRows = []; gel('csv-file').value = ''; gel('csv-preview').style.display = 'none'; gel('import-btn').disabled = true;
+    loadVolunteers();
+  } catch (e) { toast('Erreur import : ' + e.message, 'error'); }
+}
+
+// ── ASSIGNMENTS ───────────────────────────────────────────
+async function loadAssignments() {
+  if (!event_) return;
+  gel('bc-asgn-event').textContent = event_.name;
+  try {
+    const [positions, volunteers, assignments] = await Promise.all([
+      dbGet('positions',  `event_id=eq.${event_.id}&order=name.asc`),
+      dbGet('volunteers', `event_id=eq.${event_.id}&order=full_name.asc`),
+      dbGet('assignments',`event_id=eq.${event_.id}`),
+    ]);
+    _pos = positions; _vols = volunteers;
+    const total = positions.reduce((s, p) => s + (p.required_count || 1), 0);
+    const pct   = total > 0 ? Math.round(assignments.length / total * 100) : 0;
+    gel('asgn-stats').innerHTML = `
+      <div class="stat"><div class="stat-val">${positions.length}</div><div class="stat-lbl">Postes</div></div>
+      <div class="stat"><div class="stat-val">${volunteers.length}</div><div class="stat-lbl">Bénévoles</div></div>
+      <div class="stat"><div class="stat-val">${assignments.length}/${total}</div><div class="stat-lbl">Affectations</div></div>
+      <div class="stat"><div class="stat-val" style="color:${pct>=100?'var(--green)':'var(--primary)'}">${pct}%</div><div class="stat-lbl">Couverture</div></div>`;
+    const vm = Object.fromEntries(volunteers.map(v => [v.id, v]));
+    const byPos = Object.fromEntries(positions.map(p => [p.id, []]));
+    assignments.forEach(a => { if (byPos[a.position_id]) byPos[a.position_id].push(a); });
+    gel('asgn-body').innerHTML = positions.map(p => {
+      const asgns = byPos[p.id] || [];
+      const pct2  = Math.min(100, Math.round(asgns.length / (p.required_count || 1) * 100));
+      return `<div style="margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:6px">
+          <div><b style="font-size:14px">${esc(p.name)}</b> <span class="badge b-draft" style="margin-left:6px">${esc(p.type||'')}</span>
+            <span style="font-size:12px;color:var(--muted);margin-left:8px">${asgns.length}/${p.required_count||1}</span></div>
+        </div>
+        <div class="prog" style="margin-bottom:10px"><div class="prog-fill ${pct2>=100?'full':''}" style="width:${pct2}%"></div></div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          ${asgns.map(a => {
+            const v = vm[a.volunteer_id]; if (!v) return '';
+            return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:13px;display:flex;align-items:center;gap:8px">
+              <span>👤 <b>${esc(v.full_name)}</b></span>
+              <button class="btn btn-blue"    style="font-size:11px;padding:3px 7px" onclick="showLink('${a.id}','${esc(v.full_name)}','${esc(v.email||'')}','${esc(v.phone||'')}','${esc(p.name)}')">📨 Lien</button>
+              <button class="btn btn-danger"  style="font-size:11px;padding:3px 7px" onclick="deleteAssignment('${a.id}')">✕</button>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }).join('');
+  } catch (e) { gel('asgn-body').innerHTML = errHTML(e); }
+}
+
+async function openNewAsgnModal() {
+  if (!_pos.length || !_vols.length) {
+    toast('Créez d\'abord des postes et des bénévoles.', 'error'); return;
+  }
+  gel('asgn-vol').innerHTML = '<option value="">— Choisir —</option>' + _vols.map(v => `<option value="${v.id}">${esc(v.full_name)}</option>`).join('');
+  gel('asgn-pos').innerHTML = '<option value="">— Choisir —</option>' + _pos.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  openModal('m-assignment');
+}
+
+async function saveAssignment() {
+  const volId = val('asgn-vol'), posId = val('asgn-pos');
+  if (!volId || !posId) return toast('Choisissez un bénévole et un poste.', 'error');
+  try {
+    await dbPost('assignments', { event_id: event_.id, volunteer_id: volId, position_id: posId });
+    closeModal('m-assignment'); toast('Affecté !', 'success'); loadAssignments();
+  } catch (e) {
+    if (e.message.includes('unique')) toast('Ce bénévole est déjà sur ce poste.', 'error');
+    else toast('Erreur : ' + e.message, 'error');
+  }
+}
+
+async function deleteAssignment(id) {
+  if (!confirm('Supprimer cette affectation ?')) return;
+  try {
+    // Supprimer aussi token et confirmation associés
+    const tokens = await dbGet('invite_tokens', `assignment_id=eq.${id}`);
+    for (const t of tokens) { await dbDel('confirmations', `token=eq.${t.token}`).catch(()=>{}); }
+    await dbDel('invite_tokens', `assignment_id=eq.${id}`).catch(()=>{});
+    await dbDel('assignments', `id=eq.${id}`);
+    toast('Affectation supprimée.', 'info'); loadAssignments();
+  } catch (e) { toast('Erreur : ' + e.message, 'error'); }
+}
+
+// ── LINKS ─────────────────────────────────────────────────
+async function showLink(asgnId, volName, volEmail, volPhone, posName) {
+  // Récupérer ou créer le token
+  let rows = await dbGet('invite_tokens', `assignment_id=eq.${asgnId}`);
+  let tok;
+  if (rows.length) { tok = rows[0].token; }
+  else {
+    const r = await dbPost('invite_tokens', { event_id: event_.id, assignment_id: asgnId });
+    tok = (Array.isArray(r) ? r[0] : r).token;
+  }
+  const base = window.location.href.replace(/index\.html.*$/, '').replace(/\?.*$/, '');
+  const link = `${base}benevole.html?token=${tok}`;
+  _linkData = { link, volName, volEmail, volPhone, posName };
+  gel('link-info').textContent = `👤 ${volName}  —  📍 ${posName}`;
+  gel('link-url').textContent = link;
+  openModal('m-link');
+}
+
+function copyLink()  { navigator.clipboard.writeText(_linkData.link).then(() => toast('Lien copié !', 'success')); }
+function waLink()    { window.open(`https://wa.me/?text=${encodeURIComponent(`Bonjour ${_linkData.volName} 👋\n\nVotre mission : ${_linkData.posName}\nConfirmez ici 👉 ${_linkData.link}`)}`, '_blank'); }
+function emailLink() { window.open(`mailto:${_linkData.volEmail}?subject=${encodeURIComponent(`Votre mission — ${event_.name}`)}&body=${encodeURIComponent(`Bonjour ${_linkData.volName},\n\nPoste : ${_linkData.posName}\nÉvénement : ${event_.name}\n\nConfirmez ici : ${_linkData.link}`)}`, '_blank'); }
+
+// ── CONFIRMATIONS ─────────────────────────────────────────
+async function loadConfirmations() {
+  if (!event_) return;
+  gel('bc-conf-event').textContent = event_.name;
+  try {
+    const [tokens, assignments, volunteers, positions] = await Promise.all([
+      dbGet('invite_tokens', `event_id=eq.${event_.id}`),
+      dbGet('assignments',   `event_id=eq.${event_.id}`),
+      dbGet('volunteers',    `event_id=eq.${event_.id}`),
+      dbGet('positions',     `event_id=eq.${event_.id}`),
+    ]);
+    const confs = tokens.length
+      ? await dbGet('confirmations', `token=in.(${tokens.map(t=>t.token).join(',')})`)
+      : [];
+    const vm = Object.fromEntries(volunteers.map(v => [v.id, v]));
+    const pm = Object.fromEntries(positions.map(p => [p.id, p]));
+    const am = Object.fromEntries(assignments.map(a => [a.id, a]));
+    const cm = Object.fromEntries(confs.map(c => [c.token, c]));
+    const yes = confs.filter(c => c.response === 'confirmed').length;
+    const no  = confs.filter(c => c.response === 'declined').length;
+    gel('conf-stats').innerHTML = `
+      <div class="stat"><div class="stat-val">${tokens.length}</div><div class="stat-lbl">Liens envoyés</div></div>
+      <div class="stat"><div class="stat-val" style="color:var(--green)">${yes}</div><div class="stat-lbl">✅ Confirmés</div></div>
+      <div class="stat"><div class="stat-val" style="color:var(--red)">${no}</div><div class="stat-lbl">❌ Déclinés</div></div>
+      <div class="stat"><div class="stat-val" style="color:var(--muted)">${tokens.length - confs.length}</div><div class="stat-lbl">⏳ En attente</div></div>`;
+    gel('conf-body').innerHTML = tokens.length ? `<div class="tbl-wrap"><table>
+      <thead><tr><th>Bénévole</th><th>Poste</th><th>Contact</th><th>Statut</th><th>Date réponse</th></tr></thead>
+      <tbody>${tokens.map(t => {
+        const a = am[t.assignment_id], v = a ? vm[a.volunteer_id] : null, p = a ? pm[a.position_id] : null, c = cm[t.token];
+        const badge = c
+          ? (c.response === 'confirmed' ? '<span class="badge b-confirmed">✅ Confirmé</span>' : '<span class="badge b-declined">❌ Décliné</span>')
+          : '<span class="badge b-pending">⏳ En attente</span>';
+        return `<tr>
+          <td><b>${esc(v?.full_name || '—')}</b></td>
+          <td>${esc(p?.name || '—')}</td>
+          <td style="font-size:12px;color:var(--muted)">${v?.email ? '📧 '+esc(v.email) : ''}${v?.phone ? '<br>📱 '+esc(v.phone) : ''}</td>
+          <td>${badge}</td>
+          <td style="font-size:12px;color:var(--muted)">${c?.responded_at ? new Date(c.responded_at).toLocaleDateString('fr-FR') : '—'}</td>
+        </tr>`;
+      }).join('')}</tbody></table></div>`
+      : emptyState('📨', 'Aucun lien généré. Allez dans Affectations pour envoyer des liens.');
+  } catch (e) { gel('conf-body').innerHTML = errHTML(e); }
+}
+
+// ── ORGANIZERS ────────────────────────────────────────────
+async function loadOrganizers() {
+  if (!event_) return;
+  gel('bc-org-event').textContent = event_.name;
+  try {
+    const links = await dbGet('event_organizers', `event_id=eq.${event_.id}`);
+    const el = gel('organizers-list');
+    if (!links.length) { el.innerHTML = emptyState('👤', 'Aucun co-organisateur assigné.'); return; }
+    const ids = links.map(l => l.user_id).join(',');
+    const profiles = await dbGet('profiles', `id=in.(${ids})`);
+    const pm = Object.fromEntries(profiles.map(p => [p.id, p]));
+    el.innerHTML = `<div class="tbl-wrap"><table>
+      <thead><tr><th>Email</th><th>Rôle</th><th>Ajouté le</th><th></th></tr></thead>
+      <tbody>${links.map(l => {
+        const p = pm[l.user_id] || {};
+        return `<tr>
+          <td><b>${esc(p.email || '—')}</b></td>
+          <td><span class="badge b-org">Co-organisateur</span></td>
+          <td style="font-size:12px;color:var(--muted)">${new Date(l.created_at).toLocaleDateString('fr-FR')}</td>
+          <td><button class="btn btn-danger" style="font-size:11px;padding:4px 8px" onclick="removeOrganizer('${l.id}')">Retirer</button></td>
+        </tr>`;
+      }).join('')}</tbody></table></div>`;
+  } catch (e) { gel('organizers-list').innerHTML = errHTML(e); }
+}
+
+async function addOrganizer() {
+  const email = val('org-email').trim();
+  if (!email) return toast('Entrez un email.', 'error');
+  try {
+    const profiles = await dbGet('profiles', `email=eq.${encodeURIComponent(email)}`);
+    if (!profiles.length) return toast('Aucun compte trouvé pour cet email.', 'error');
+    const existing = await dbGet('event_organizers', `event_id=eq.${event_.id}&user_id=eq.${profiles[0].id}`);
+    if (existing.length) return toast('Déjà organisateur sur cet événement.', 'error');
+    await dbPost('event_organizers', { event_id: event_.id, user_id: profiles[0].id });
+    set('org-email', ''); toast('Co-organisateur ajouté !', 'success'); loadOrganizers();
+  } catch (e) { toast('Erreur : ' + e.message, 'error'); }
+}
+
+async function removeOrganizer(linkId) {
+  if (!confirm('Retirer ce co-organisateur ?')) return;
+  await dbDel('event_organizers', `id=eq.${linkId}`);
+  toast('Retiré.', 'info'); loadOrganizers();
+}
+
+// ── USERS (admin) ─────────────────────────────────────────
+async function loadUsers() {
+  try {
+    _users = await dbGet('profiles', 'order=created_at.desc');
+    renderUsers(_users);
+  } catch (e) { gel('users-list').innerHTML = errHTML(e); }
+}
+
+function renderUsers(list) {
+  const el = gel('users-list');
+  if (!list.length) { el.innerHTML = emptyState('👤', 'Aucun utilisateur.'); return; }
+  el.innerHTML = `<div class="tbl-wrap"><table>
+    <thead><tr><th>Email</th><th>Rôle</th><th>Inscrit le</th><th>Modifier</th></tr></thead>
+    <tbody>${list.map(u => `<tr>
+      <td><b>${esc(u.email)}</b>${u.id === me?.id ? ' <span class="badge b-draft">vous</span>' : ''}</td>
+      <td><span class="badge ${u.role === 'admin' ? 'b-admin' : 'b-org'}">${u.role === 'admin' ? '⚡ Admin' : '🎯 Organisateur'}</span></td>
+      <td style="font-size:12px;color:var(--muted)">${new Date(u.created_at).toLocaleDateString('fr-FR')}</td>
+      <td>${u.id === me?.id ? '<span style="font-size:12px;color:var(--muted)">— (votre compte)</span>' :
+        `<select onchange="changeRole('${u.id}',this.value)" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:6px;font-size:12px;font-family:var(--fb)">
+          <option value="organisateur" ${u.role==='organisateur'?'selected':''}>🎯 Organisateur</option>
+          <option value="admin" ${u.role==='admin'?'selected':''}>⚡ Admin</option>
+        </select>`
+      }</td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
+
+function filterUsers() {
+  const q = gel('users-search').value.toLowerCase();
+  renderUsers(_users.filter(u => (u.email || '').toLowerCase().includes(q)));
+}
+
+async function changeRole(uid, role) {
+  if (!confirm(`Changer le rôle en "${role}" ?`)) { loadUsers(); return; }
+  try {
+    await dbPatch('profiles', `id=eq.${uid}`, { role });
+    toast('Rôle mis à jour.', 'success'); loadUsers();
+  } catch (e) { toast('Erreur : ' + e.message, 'error'); loadUsers(); }
+}
+
+// ── MODALS ────────────────────────────────────────────────
+function openModal(id)  { gel(id).classList.add('open'); }
+function closeModal(id) { gel(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
+
+// ── UTILS ─────────────────────────────────────────────────
+const gel = id => document.getElementById(id);
+const val = id => (gel(id)?.value || '').trim();
+const set = (id, v) => { const el = gel(id); if (el) el.value = v; };
+const show = id => { const el = gel(id); if (el) el.style.display = 'block'; };
+const hide = id => { const el = gel(id); if (el) el.style.display = 'none'; };
+const dis  = (id, d) => { const el = gel(id); if (el) el.disabled = d; };
+const clearForm = ids => ids.forEach(id => set(id, ''));
+function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
+function toast(msg, type = 'info') {
+  const t = gel('toast'); t.textContent = msg; t.className = `show ${type}`;
+  clearTimeout(t._tid); t._tid = setTimeout(() => t.className = '', 3000);
+}
+function authErr(id, msg, isErr = true) {
+  const el = gel(id); el.textContent = msg; el.style.display = 'block';
+  el.className = isErr ? 'alert alert-error' : 'alert alert-info';
+}
+function emptyState(icon, txt, extra = '') {
+  return `<div class="empty"><div class="icon">${icon}</div><p>${txt}</p>${extra}</div>`;
+}
+function errHTML(e) { return `<div class="alert alert-error">Erreur : ${esc(e.message)}</div>`; }
+</script>
+</body>
+</html>

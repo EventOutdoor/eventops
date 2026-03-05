@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventOps — Ma mission</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #F4F6F9;
+  --surface: #FFFFFF;
+  --border:  #E5E7EB;
+  --text:    #111827;
+  --muted:   #6B7280;
+  --primary: #F97316;
+  --green:   #16A34A;
+  --red:     #DC2626;
+  --fh: 'Syne', sans-serif;
+  --fb: 'DM Sans', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--fb); min-height: 100vh; }
+
+header {
+  background: #0D1117; padding: 16px 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+.logo { font-family: var(--fh); font-size: 16px; font-weight: 800; color: var(--primary); }
+.logo span { font-size: 12px; font-weight: 400; color: rgba(255,255,255,.45); margin-left: 8px; }
+
+.container { max-width: 540px; margin: 0 auto; padding: 28px 16px 48px; }
+
+/* CARD */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+.card-header { background: linear-gradient(135deg,#0D1117,#1C2433); color: #fff; padding: 24px 22px; }
+.ev-label { font-size: 11px; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 4px; }
+.ev-name  { font-family: var(--fh); font-size: 13px; font-weight: 700; color: rgba(255,255,255,.7); margin-bottom: 12px; }
+.pos-name { font-family: var(--fh); font-size: 26px; font-weight: 800; line-height: 1.1; }
+.card-body { padding: 20px 22px; }
+
+.detail { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.detail:last-child { border-bottom: none; }
+.detail-key { font-size: 12px; color: var(--muted); width: 90px; flex-shrink: 0; padding-top: 1px; }
+.detail-val { font-size: 14px; flex: 1; }
+
+/* STATUS */
+.status-box { border-radius: 12px; padding: 22px; text-align: center; margin-bottom: 16px; }
+.status-confirmed { background: #DCFCE7; border: 2px solid #86EFAC; }
+.status-declined  { background: #FEE2E2; border: 2px solid #FCA5A5; }
+.status-pending   { background: #FEF3C7; border: 2px solid #FCD34D; }
+.status-icon  { font-size: 44px; margin-bottom: 10px; }
+.status-title { font-family: var(--fh); font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+.status-sub   { font-size: 14px; color: var(--muted); }
+
+/* BUTTONS */
+.btn { display: block; width: 100%; padding: 14px; border: none; border-radius: 10px; font-family: var(--fb); font-size: 15px; font-weight: 500; cursor: pointer; margin-bottom: 10px; transition: all .15s; }
+.btn-confirm { background: var(--green); color: #fff; }
+.btn-confirm:hover { background: #15803D; }
+.btn-decline { background: var(--surface); color: var(--red); border: 2px solid #FECACA; }
+.btn-decline:hover { background: #FEF2F2; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* LOADING / ERROR */
+.loading { text-align: center; padding: 80px 20px; color: var(--muted); }
+.spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 16px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.error { text-align: center; padding: 60px 20px; }
+.error .icon { font-size: 44px; margin-bottom: 12px; }
+.error p { color: var(--muted); font-size: 15px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">⚡ EventOps <span>Portail bénévole</span></div>
+</header>
+
+<div class="container" id="root">
+  <div class="loading"><div class="spinner"></div>Chargement de votre mission…</div>
+</div>
+
+<script>
+'use strict';
+const SB_URL  = 'https://zchybozcpzelmjqymudp.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjaHlib3pjcHplbG1qcXltdWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDE2MDAsImV4cCI6MjA4ODIxNzYwMH0.N2qnJgMNq5PzQ_42Pd7vgf47GmWVEQ8pBHMLKelLEp8';
+
+async function get(table, query = '') {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?${query}`, {
+    headers: { 'apikey': SB_ANON, 'Authorization': `Bearer ${SB_ANON}` },
+  });
+  const t = await r.text();
+  if (!r.ok) throw new Error(t);
+  return t ? JSON.parse(t) : [];
+}
+
+async function upsert(table, data) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SB_ANON, 'Authorization': `Bearer ${SB_ANON}`,
+      'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=representation',
+    },
+    body: JSON.stringify(data),
+  });
+  const t = await r.text();
+  if (!r.ok) throw new Error(t);
+  return t ? JSON.parse(t) : [];
+}
+
+function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''; }
+
+async function init() {
+  const token = new URLSearchParams(window.location.search).get('token');
+  if (!token) { renderError('Lien invalide', 'Aucun identifiant trouvé dans ce lien.'); return; }
+  try {
+    // Charger le token
+    const tokens = await get('invite_tokens', `token=eq.${token}`);
+    if (!tokens.length) { renderError('Lien introuvable', 'Ce lien n\'existe pas ou a expiré.'); return; }
+    const tk = tokens[0];
+
+    // Charger les données en parallèle
+    const [assignments, events, confs] = await Promise.all([
+      get('assignments',  `id=eq.${tk.assignment_id}`),
+      get('events',       `id=eq.${tk.event_id}`),
+      get('confirmations',`token=eq.${token}`),
+    ]);
+    if (!assignments.length || !events.length) { renderError('Données introuvables', 'Impossible de charger votre mission.'); return; }
+    const asgn  = assignments[0];
+    const event = events[0];
+    const [volunteers, positions] = await Promise.all([
+      get('volunteers', `id=eq.${asgn.volunteer_id}`),
+      get('positions',  `id=eq.${asgn.position_id}`),
+    ]);
+    const vol = volunteers[0];
+    const pos = positions[0];
+    const conf = confs[0] || null;
+
+    renderMission(event, vol, pos, token, conf);
+  } catch (e) { renderError('Erreur', e.message); }
+}
+
+function renderMission(event, vol, pos, token, conf) {
+  const d = event.start_date
+    ? new Date(event.start_date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    : null;
+  const details = [
+    d              ? { key: 'Date',         val: '📅 ' + d }         : null,
+    event.location ? { key: 'Lieu',         val: '📍 ' + esc(event.location) } : null,
+    pos?.type      ? { key: 'Type de poste',val: esc(pos.type) }      : null,
+    pos?.description?{ key: 'Instructions', val: esc(pos.description)}: null,
+    pos?.material  ? { key: 'Matériel',     val: '🎒 ' + esc(pos.material) }  : null,
+  ].filter(Boolean);
+
+  const statusHtml = conf ? renderStatus(conf, vol) : renderForm(token);
+
+  document.getElementById('root').innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div class="ev-label">Votre mission</div>
+        <div class="ev-name">${esc(event.name)}</div>
+        <div class="pos-name">${esc(pos?.name || '—')}</div>
+      </div>
+      <div class="card-body">
+        ${vol ? `<div style="font-size:15px;font-weight:600;margin-bottom:14px">Bonjour ${esc(vol.full_name.split(' ')[0])} 👋</div>` : ''}
+        ${details.map(d => `
+          <div class="detail">
+            <div class="detail-key">${d.key}</div>
+            <div class="detail-val">${d.val}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+    ${statusHtml}`;
+}
+
+function renderForm(token) {
+  return `<div class="card" style="padding:22px" id="confirm-zone">
+    <div style="font-family:var(--fh);font-size:17px;font-weight:700;margin-bottom:6px">Confirmez votre présence</div>
+    <div style="font-size:14px;color:var(--muted);margin-bottom:20px">Votre réponse aide l'organisateur à finaliser l'événement.</div>
+    <button class="btn btn-confirm" onclick="respond('${token}','confirmed')">✅ Je confirme ma présence</button>
+    <button class="btn btn-decline" onclick="respond('${token}','declined')">Je ne serai pas disponible</button>
+  </div>`;
+}
+
+function renderStatus(conf, vol) {
+  if (conf.response === 'confirmed') {
+    return `<div class="status-box status-confirmed">
+      <div class="status-icon">✅</div>
+      <div class="status-title">Merci ${vol ? esc(vol.full_name.split(' ')[0]) : ''} !</div>
+      <div class="status-sub">Votre présence est confirmée. À bientôt !</div>
+    </div>`;
+  }
+  return `<div class="status-box status-declined">
+    <div class="status-icon">💙</div>
+    <div class="status-title">Réponse enregistrée</div>
+    <div class="status-sub">Merci pour votre retour.</div>
+  </div>`;
+}
+
+async function respond(token, response) {
+  const btns = document.querySelectorAll('#confirm-zone .btn');
+  btns.forEach(b => b.disabled = true);
+  try {
+    // Vérifier si confirmation existe déjà
+    const existing = await get('confirmations', `token=eq.${token}`);
+    const data = { token, response, responded_at: new Date().toISOString() };
+    if (existing.length) {
+      // Update via upsert
+      await upsert('confirmations', data);
+    } else {
+      await upsert('confirmations', data);
+    }
+    // Recharger la page pour afficher le statut final
+    const confs = await get('confirmations', `token=eq.${token}`);
+    const zone = document.getElementById('confirm-zone');
+    if (zone) zone.outerHTML = renderStatus(confs[0], null);
+  } catch (e) {
+    btns.forEach(b => b.disabled = false);
+    alert('Erreur lors de l\'enregistrement. Réessayez.');
+  }
+}
+
+function renderError(title, msg) {
+  document.getElementById('root').innerHTML = `
+    <div class="error">
+      <div class="icon">❌</div>
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:8px">${esc(title)}</div>
+      <p>${esc(msg)}</p>
+    </div>`;
+}
+
+init();
+</script>
+</body>
+</html>
