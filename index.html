@@ -3,368 +3,249 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EventOps Outdoor — Organisateur</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
+<title>EventOps Outdoor — Backoffice</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0D1117;
-    --surface: #161B22;
-    --surface2: #21262D;
-    --border: #30363D;
-    --primary: #F97316;
-    --primary-dim: rgba(249,115,22,0.15);
-    --green: #22C55E;
-    --green-dim: rgba(34,197,94,0.12);
-    --red: #EF4444;
-    --red-dim: rgba(239,68,68,0.12);
-    --blue: #3B82F6;
-    --blue-dim: rgba(59,130,246,0.12);
-    --text: #E6EDF3;
-    --muted: #8B949E;
-    --font-head: 'Syne', sans-serif;
-    --font-body: 'DM Sans', sans-serif;
-    --radius: 10px;
-    --shadow: 0 4px 24px rgba(0,0,0,0.4);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; }
+:root {
+  --bg:#0D1117; --surface:#161B22; --surface2:#21262D; --border:#30363D;
+  --primary:#F97316; --pdim:rgba(249,115,22,0.15);
+  --green:#22C55E; --gdim:rgba(34,197,94,0.12);
+  --red:#EF4444; --rdim:rgba(239,68,68,0.12);
+  --blue:#3B82F6; --bdim:rgba(59,130,246,0.12);
+  --yellow:#EAB308; --ydim:rgba(234,179,8,0.12);
+  --text:#E6EDF3; --muted:#8B949E;
+  --fh:'Syne',sans-serif; --fb:'DM Sans',sans-serif;
+  --r:10px; --sh:0 4px 24px rgba(0,0,0,0.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100vh}
 
-  /* ── AUTH ── */
-  #auth-screen {
-    min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    background: radial-gradient(ellipse at 30% 50%, rgba(249,115,22,0.08) 0%, transparent 60%),
-                radial-gradient(ellipse at 70% 20%, rgba(59,130,246,0.06) 0%, transparent 50%), var(--bg);
-  }
-  .auth-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-    padding: 48px; width: 420px; box-shadow: var(--shadow);
-  }
-  .logo { font-family: var(--font-head); font-size: 26px; font-weight: 800; color: var(--primary); margin-bottom: 6px; }
-  .logo span { color: var(--muted); font-weight: 400; font-size: 14px; display: block; margin-top: 2px; }
-  .auth-title { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin: 32px 0 24px; }
+/* AUTH */
+#auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 30% 50%,rgba(249,115,22,.08) 0%,transparent 60%),var(--bg)}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:48px;width:420px;box-shadow:var(--sh)}
+.logo{font-family:var(--fh);font-size:24px;font-weight:800;color:var(--primary)}
+.logo span{color:var(--muted);font-weight:400;font-size:13px;display:block;margin-top:2px}
+.auth-title{font-family:var(--fh);font-size:20px;font-weight:700;margin:28px 0 20px}
 
-  /* ── INPUTS ── */
-  label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
-  input, select, textarea {
-    width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
-    color: var(--text); font-family: var(--font-body); font-size: 14px; padding: 10px 14px;
-    outline: none; transition: border-color .2s;
-  }
-  input:focus, select:focus, textarea:focus { border-color: var(--primary); }
-  .field { margin-bottom: 18px; }
-  textarea { resize: vertical; min-height: 72px; }
+/* INPUTS */
+label{display:block;font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--fb);font-size:14px;padding:10px 14px;outline:none;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--primary)}
+.field{margin-bottom:16px}
+textarea{resize:vertical;min-height:72px}
+select option{background:var(--surface2)}
 
-  /* ── BUTTONS ── */
-  .btn {
-    display: inline-flex; align-items: center; gap: 8px; border: none; border-radius: 8px;
-    font-family: var(--font-body); font-size: 14px; font-weight: 500; cursor: pointer;
-    padding: 10px 18px; transition: all .2s; white-space: nowrap;
-  }
-  .btn-primary { background: var(--primary); color: #fff; }
-  .btn-primary:hover { background: #EA6B0E; transform: translateY(-1px); }
-  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-  .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
-  .btn-danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
-  .btn-danger:hover { background: rgba(239,68,68,0.2); }
-  .btn-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
-  .btn-green:hover { background: rgba(34,197,94,0.2); }
-  .btn-full { width: 100%; justify-content: center; padding: 12px; font-size: 15px; }
-  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none !important; }
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:8px;font-family:var(--fb);font-size:14px;font-weight:500;cursor:pointer;padding:10px 18px;transition:all .2s;white-space:nowrap}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:#EA6B0E;transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}.btn-ghost:hover{color:var(--text);border-color:var(--muted)}
+.btn-danger{background:var(--rdim);color:var(--red);border:1px solid rgba(239,68,68,.3)}.btn-danger:hover{background:rgba(239,68,68,.2)}
+.btn-green{background:var(--gdim);color:var(--green);border:1px solid rgba(34,197,94,.3)}.btn-green:hover{background:rgba(34,197,94,.2)}
+.btn-blue{background:var(--bdim);color:var(--blue);border:1px solid rgba(59,130,246,.3)}.btn-blue:hover{background:rgba(59,130,246,.2)}
+.btn-yellow{background:var(--ydim);color:var(--yellow);border:1px solid rgba(234,179,8,.3)}
+.btn-full{width:100%;justify-content:center;padding:12px;font-size:15px}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
 
-  /* ── APP LAYOUT ── */
-  #app { display: none; }
-  .sidebar {
-    position: fixed; top: 0; left: 0; width: 220px; height: 100vh;
-    background: var(--surface); border-right: 1px solid var(--border);
-    display: flex; flex-direction: column; z-index: 100;
-  }
-  .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid var(--border); }
-  .sidebar-logo .logo-main { font-family: var(--font-head); font-size: 18px; font-weight: 800; color: var(--primary); }
-  .sidebar-logo .logo-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
-  .nav-item {
-    display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px;
-    cursor: pointer; color: var(--muted); font-size: 14px; font-weight: 500; transition: all .15s;
-    border: none; background: none; width: 100%; text-align: left;
-  }
-  .nav-item:hover { background: var(--surface2); color: var(--text); }
-  .nav-item.active { background: var(--primary-dim); color: var(--primary); }
-  .nav-sep { height: 1px; background: var(--border); margin: 8px 0; }
-  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
-  .sidebar-footer { padding: 16px 12px; border-top: 1px solid var(--border); }
-  .user-info { font-size: 12px; color: var(--muted); margin-bottom: 10px; word-break: break-all; }
+/* LAYOUT */
+#app{display:none}
+.sidebar{position:fixed;top:0;left:0;width:230px;height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+.sidebar-logo{padding:22px 18px 18px;border-bottom:1px solid var(--border)}
+.sidebar-logo .lm{font-family:var(--fh);font-size:17px;font-weight:800;color:var(--primary)}
+.sidebar-logo .ls{font-size:11px;color:var(--muted);margin-top:2px}
+.nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--pdim);color:var(--primary)}
+.nav-sep{height:1px;background:var(--border);margin:6px 0}
+.nav-section{padding:8px 12px 4px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.nav-badge{margin-left:auto;background:var(--primary);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px}
+.sidebar-footer{padding:14px 10px;border-top:1px solid var(--border)}
+.user-chip{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--surface2);margin-bottom:10px}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--pdim);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.user-name{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-role{font-size:11px;color:var(--muted)}
+.main{margin-left:230px;padding:32px;min-height:100vh}
+.page{display:none}
+.page.active{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 
-  .main { margin-left: 220px; padding: 32px; min-height: 100vh; }
-  .page { display: none; }
-  .page.active { display: block; animation: fadeIn .2s ease; }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+/* PAGE HEADER */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px}
+.page-title{font-family:var(--fh);font-size:26px;font-weight:800}
+.page-sub{color:var(--muted);font-size:14px;margin-top:4px}
+.breadcrumb{font-size:12px;color:var(--muted);margin-bottom:6px}
+.breadcrumb span{color:var(--primary);cursor:pointer}.breadcrumb span:hover{text-decoration:underline}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap}
 
-  /* ── PAGE HEADER ── */
-  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; }
-  .page-title { font-family: var(--font-head); font-size: 28px; font-weight: 800; }
-  .page-sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
-  .breadcrumb { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
-  .breadcrumb span { color: var(--primary); cursor: pointer; }
-  .breadcrumb span:hover { text-decoration: underline; }
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:16px}
+.card-title{font-family:var(--fh);font-size:15px;font-weight:700;margin-bottom:16px}
 
-  /* ── CARDS ── */
-  .card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 24px; margin-bottom: 16px;
-  }
-  .card-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;text-align:center}
+.stat-value{font-family:var(--fh);font-size:32px;font-weight:800;color:var(--primary)}
+.stat-label{font-size:11px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.05em}
 
-  /* ── EVENT CARDS ── */
-  .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
-  .event-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 20px; cursor: pointer; transition: all .2s; position: relative; overflow: hidden;
-  }
-  .event-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background: var(--primary); }
-  .event-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow); }
-  .event-name { font-family: var(--font-head); font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-  .event-meta { font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
-  .event-meta b { color: var(--text); }
+/* TABLE */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);font-weight:600}
+td{padding:11px 14px;border-bottom:1px solid rgba(48,54,61,.5);font-size:14px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.td-actions{display:flex;gap:6px}
 
-  /* ── STATUS BADGES ── */
-  .badge {
-    display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 99px;
-    font-size: 12px; font-weight: 500;
-  }
-  .badge-draft { background: rgba(139,148,158,0.15); color: var(--muted); }
-  .badge-published { background: var(--green-dim); color: var(--green); }
-  .badge-done { background: var(--blue-dim); color: var(--blue); }
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:12px;font-weight:500}
+.badge-draft{background:rgba(139,148,158,.15);color:var(--muted)}
+.badge-published{background:var(--gdim);color:var(--green)}
+.badge-done{background:var(--bdim);color:var(--blue)}
+.badge-pending{background:var(--ydim);color:var(--yellow)}
+.badge-accepted{background:var(--gdim);color:var(--green)}
+.badge-declined{background:var(--rdim);color:var(--red)}
+.badge-admin{background:rgba(249,115,22,.2);color:var(--primary)}
+.badge-org{background:var(--bdim);color:var(--blue)}
+.badge-benevole{background:var(--gdim);color:var(--green)}
 
-  /* ── STATS ── */
-  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
-  .stat-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 20px; text-align: center;
-  }
-  .stat-value { font-family: var(--font-head); font-size: 36px; font-weight: 800; color: var(--primary); }
-  .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .05em; }
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:30px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal-title{font-family:var(--fh);font-size:18px;font-weight:700;margin-bottom:22px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:22px}
+.modal-lg{max-width:700px}
 
-  /* ── TABLE ── */
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; }
-  th { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); font-weight: 600; }
-  td { padding: 12px 14px; border-bottom: 1px solid rgba(48,54,61,0.5); font-size: 14px; vertical-align: middle; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--surface2); }
-  .td-actions { display: flex; gap: 6px; }
+/* TABS */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:22px}
+.tab{padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted);transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--fb)}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
 
-  /* ── PROGRESS BAR ── */
-  .progress-bar { background: var(--surface2); border-radius: 99px; height: 6px; overflow: hidden; }
-  .progress-fill { height: 100%; border-radius: 99px; background: var(--primary); transition: width .4s; }
-  .progress-fill.full { background: var(--green); }
-  .progress-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+/* PROGRESS */
+.progress-bar{background:var(--surface2);border-radius:99px;height:6px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;background:var(--primary);transition:width .4s}
+.progress-fill.full{background:var(--green)}
 
-  /* ── MODAL ── */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 500;
-    display: none; align-items: center; justify-content: center; padding: 20px;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
-    padding: 32px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-  }
-  .modal-title { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-bottom: 24px; }
-  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+/* GRID */
+.events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.event-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.event-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--primary)}
+.event-card:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:var(--sh)}
+.event-name{font-family:var(--fh);font-size:17px;font-weight:700;margin-bottom:8px}
+.event-meta{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
 
-  /* ── TOAST ── */
-  #toast {
-    position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 8px;
-    font-size: 14px; font-weight: 500; z-index: 9999; opacity: 0; transition: opacity .3s;
-    pointer-events: none;
-  }
-  #toast.show { opacity: 1; }
-  #toast.success { background: var(--green); color: #fff; }
-  #toast.error { background: var(--red); color: #fff; }
-  #toast.info { background: var(--blue); color: #fff; }
+/* SLOT */
+.slot-chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;margin:3px}
 
-  /* ── ALERT ── */
-  .alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; }
-  .alert-error { background: var(--red-dim); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
-  .alert-info { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(59,130,246,0.3); }
+/* BALISAGE */
+.bal-non{color:var(--muted)} .bal-en{color:var(--yellow)} .bal-ok{color:var(--green)}
 
-  /* ── SEARCH ── */
-  .search-bar { position: relative; margin-bottom: 16px; }
-  .search-bar input { padding-left: 36px; }
-  .search-bar::before { content:'🔍'; position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:14px; }
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:500;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
+#toast.show{opacity:1}
+#toast.success{background:var(--green);color:#fff}
+#toast.error{background:var(--red);color:#fff}
+#toast.info{background:var(--blue);color:#fff}
 
-  /* ── TABS ── */
-  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
-  .tab {
-    padding: 10px 18px; font-size: 14px; font-weight: 500; cursor: pointer;
-    border-bottom: 2px solid transparent; color: var(--muted); transition: all .15s;
-    background: none; border-top: none; border-left: none; border-right: none;
-    font-family: var(--font-body);
-  }
-  .tab:hover { color: var(--text); }
-  .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+/* ALERT */
+.alert{padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:14px}
+.alert-error{background:var(--rdim);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.alert-info{background:var(--bdim);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
+.alert-success{background:var(--gdim);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.alert-warning{background:var(--ydim);color:var(--yellow);border:1px solid rgba(234,179,8,.3)}
 
-  /* ── CONFIRMATION ── */
-  .confirm-yes { color: var(--green); }
-  .confirm-no { color: var(--red); }
-  .confirm-pending { color: var(--muted); }
+.empty-state{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty-state .icon{font-size:44px;margin-bottom:14px}
+.search-bar{position:relative;margin-bottom:14px}
+.search-bar input{padding-left:36px}
+.search-bar::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px}
 
-  /* ── LINK BOX ── */
-  .link-box {
-    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
-    padding: 10px 14px; font-size: 13px; font-family: monospace; color: var(--primary);
-    word-break: break-all; margin: 8px 0;
-  }
+/* REQUEST CARD */
+.request-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px}
+.request-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.request-name{font-weight:600;font-size:15px}
+.request-msg{font-size:13px;color:var(--muted);margin-bottom:10px}
+.request-actions{display:flex;gap:8px}
 
-  /* ── SETUP SCREEN ── */
-  .setup-card {
-    max-width: 640px; margin: 40px auto;
-    background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px;
-  }
-  .setup-step { display: flex; gap: 16px; margin-bottom: 20px; align-items: flex-start; }
-  .step-num {
-    width: 28px; height: 28px; border-radius: 50%; background: var(--primary);
-    color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; margin-top: 2px;
-  }
-
-  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
-  .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
-  .empty-state p { margin-bottom: 20px; }
-
-  select option { background: var(--surface2); }
+/* FICHE POSTE */
+@media print {
+  .no-print{display:none!important}
+  body{background:#fff;color:#000}
+  .fiche-print{padding:20px}
+}
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════════ -->
-<!-- AUTH SCREEN -->
-<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- AUTH -->
 <div id="auth-screen">
-  <div id="setup-view" style="display:none; width:100%; max-width:700px; padding:20px;">
-    <div class="setup-card">
-      <div class="logo">⚡ EventOps Outdoor <span>Configuration initiale</span></div>
-      <div class="auth-title">Connecter votre base Supabase</div>
-      <div class="alert alert-info">
-        Vous n'avez pas encore configuré votre base de données. Suivez les étapes ci-dessous pour démarrer gratuitement.
-      </div>
-      <div class="setup-step">
-        <div class="step-num">1</div>
-        <div>
-          <b>Créer un compte Supabase</b><br>
-          <span style="color:var(--muted); font-size:13px;">Allez sur <a href="https://supabase.com" target="_blank" style="color:var(--primary)">supabase.com</a> → "Start your project" → gratuit</span>
-        </div>
-      </div>
-      <div class="setup-step">
-        <div class="step-num">2</div>
-        <div>
-          <b>Créer un nouveau projet</b><br>
-          <span style="color:var(--muted); font-size:13px;">Notez votre <b>Project URL</b> et votre <b>anon public key</b> (Settings → API)</span>
-        </div>
-      </div>
-      <div class="setup-step">
-        <div class="step-num">3</div>
-        <div>
-          <b>Créer les tables</b><br>
-          <span style="color:var(--muted); font-size:13px;">Allez dans SQL Editor et collez le script fourni dans le fichier <b>setup.sql</b></span>
-        </div>
-      </div>
-      <div class="setup-step">
-        <div class="step-num">4</div>
-        <div>
-          <b>Entrez vos identifiants Supabase ci-dessous</b>
-        </div>
-      </div>
-      <div class="field">
-        <label>Project URL Supabase</label>
-        <input type="url" id="setup-url" placeholder="https://xxxxxxxxxxxx.supabase.co">
-      </div>
-      <div class="field">
-        <label>Anon Public Key</label>
-        <input type="text" id="setup-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
-      </div>
-      <button class="btn btn-primary btn-full" onclick="saveConfig()">✅ Enregistrer et démarrer</button>
-    </div>
-  </div>
-
   <div id="login-view" class="auth-card">
-    <div class="logo">⚡ EventOps Outdoor <span>Interface organisateur</span></div>
+    <div class="logo">⚡ EventOps Outdoor <span>Espace organisateur</span></div>
     <div class="auth-title">Connexion</div>
     <div id="auth-error" class="alert alert-error" style="display:none"></div>
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="login-email" placeholder="vous@exemple.fr" autocomplete="email">
-    </div>
-    <div class="field">
-      <label>Mot de passe</label>
-      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
-    </div>
+    <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="vous@exemple.fr"></div>
+    <div class="field"><label>Mot de passe</label><input type="password" id="login-password" placeholder="••••••••"></div>
     <button class="btn btn-primary btn-full" id="login-btn" onclick="login()">Se connecter</button>
-    <div style="text-align:center; margin-top:16px;">
-      <button class="btn btn-ghost" onclick="showRegister()" style="font-size:13px;">Créer un compte organisateur</button>
-    </div>
-    <div style="text-align:center; margin-top:8px;">
-      <button class="btn btn-ghost" onclick="showSetup()" style="font-size:12px; color:var(--muted)">⚙️ Reconfigurer Supabase</button>
+    <div style="text-align:center;margin-top:14px">
+      <button class="btn btn-ghost" onclick="showReg()" style="font-size:13px">Créer un compte</button>
     </div>
   </div>
-
-  <div id="register-view" class="auth-card" style="display:none">
-    <div class="logo">⚡ EventOps Outdoor <span>Interface organisateur</span></div>
-    <div class="auth-title">Créer un compte</div>
+  <div id="reg-view" class="auth-card" style="display:none">
+    <div class="logo">⚡ EventOps Outdoor <span>Créer un compte</span></div>
+    <div class="auth-title">Inscription</div>
     <div id="reg-error" class="alert alert-error" style="display:none"></div>
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="reg-email" placeholder="vous@exemple.fr">
-    </div>
-    <div class="field">
-      <label>Mot de passe (min. 6 caractères)</label>
-      <input type="password" id="reg-password" placeholder="••••••••">
-    </div>
+    <div class="field"><label>Nom complet</label><input type="text" id="reg-name" placeholder="Jean Dupont"></div>
+    <div class="field"><label>Email</label><input type="email" id="reg-email" placeholder="vous@exemple.fr"></div>
+    <div class="field"><label>Mot de passe</label><input type="password" id="reg-pwd" placeholder="Min. 6 caractères"></div>
     <button class="btn btn-primary btn-full" id="reg-btn" onclick="register()">Créer mon compte</button>
-    <div style="text-align:center; margin-top:16px;">
-      <button class="btn btn-ghost" onclick="showLogin()" style="font-size:13px;">← Déjà un compte ?</button>
+    <div style="text-align:center;margin-top:14px">
+      <button class="btn btn-ghost" onclick="showLogin()" style="font-size:13px">← Déjà un compte</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ -->
 <!-- APP -->
-<!-- ═══════════════════════════════════════════════════════════ -->
 <div id="app">
   <nav class="sidebar">
     <div class="sidebar-logo">
-      <div class="logo-main">⚡ EventOps</div>
-      <div class="logo-sub">Outdoor</div>
+      <div class="lm">⚡ EventOps</div>
+      <div class="ls">Outdoor — Backoffice</div>
     </div>
     <div class="nav">
-      <button class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
-        <span class="icon">🏠</span> Tableau de bord
-      </button>
-      <button class="nav-item" onclick="showPage('events')" id="nav-events">
-        <span class="icon">📅</span> Événements
-      </button>
-      <div id="event-nav-group" style="display:none">
+      <button class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">🏠 Tableau de bord</button>
+      <button class="nav-item" onclick="showPage('events')" id="nav-events">📅 Événements</button>
+
+      <div id="event-nav" style="display:none">
         <div class="nav-sep"></div>
-        <div style="padding: 6px 12px; font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted)" id="event-nav-label">Événement actif</div>
-        <button class="nav-item" onclick="showPage('positions')" id="nav-positions">
-          <span class="icon">📍</span> Postes
-        </button>
-        <button class="nav-item" onclick="showPage('volunteers')" id="nav-volunteers">
-          <span class="icon">👥</span> Bénévoles
-        </button>
-        <button class="nav-item" onclick="showPage('assignments')" id="nav-assignments">
-          <span class="icon">🔗</span> Affectations
-        </button>
-        <button class="nav-item" onclick="showPage('confirmations')" id="nav-confirmations">
-          <span class="icon">✅</span> Confirmations
-        </button>
+        <div class="nav-section" id="event-nav-name">Événement actif</div>
+        <button class="nav-item" onclick="showPage('positions')" id="nav-positions">📍 Postes & Créneaux</button>
+        <button class="nav-item" onclick="showPage('volunteers-mgmt')" id="nav-volunteers-mgmt">👥 Bénévoles</button>
+        <button class="nav-item" onclick="showPage('assignments')" id="nav-assignments">🔗 Affectations</button>
+        <button class="nav-item" onclick="showPage('requests')" id="nav-requests">📬 Demandes <span class="nav-badge" id="requests-badge" style="display:none">0</span></button>
+        <button class="nav-item" onclick="showPage('confirmations')" id="nav-confirmations">✅ Confirmations</button>
+        <button class="nav-item" onclick="showPage('balisage')" id="nav-balisage">🚩 Balisage</button>
+        <button class="nav-item" onclick="showPage('pointage')" id="nav-pointage">📋 Pointage Jour J</button>
       </div>
+
+      <div class="nav-sep"></div>
+      <div id="admin-nav" style="display:none">
+        <div class="nav-section">Administration</div>
+        <button class="nav-item" onclick="showPage('admin-users')" id="nav-admin-users">👤 Utilisateurs</button>
+        <button class="nav-item" onclick="showPage('admin-notifs')" id="nav-admin-notifs">📧 Emails</button>
+      </div>
+      <button class="nav-item" onclick="showPage('messages')" id="nav-messages">💬 Messages</button>
     </div>
     <div class="sidebar-footer">
-      <div class="user-info" id="user-email-display"></div>
-      <button class="btn btn-ghost" style="width:100%; justify-content:center; font-size:13px;" onclick="logout()">Déconnexion</button>
+      <div class="user-chip">
+        <div class="user-avatar" id="user-avatar">👤</div>
+        <div style="overflow:hidden">
+          <div class="user-name" id="user-name">—</div>
+          <div class="user-role" id="user-role-display">—</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center;font-size:13px" onclick="logout()">Déconnexion</button>
     </div>
   </nav>
 
@@ -373,26 +254,22 @@
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
       <div class="page-header">
-        <div>
-          <div class="page-title">Tableau de bord</div>
-          <div class="page-sub">Vue globale de vos événements</div>
+        <div><div class="page-title">Tableau de bord</div><div class="page-sub" id="dash-greeting"></div></div>
+        <div class="header-actions">
+          <button class="btn btn-primary" onclick="openModal('modal-event')">+ Nouvel événement</button>
         </div>
-        <button class="btn btn-primary" onclick="openModal('modal-event')">+ Nouvel événement</button>
       </div>
       <div class="stats-row" id="dash-stats"></div>
-      <div class="card">
-        <div class="card-title">Événements récents</div>
-        <div id="dash-events"></div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px" id="dash-grid">
+        <div class="card"><div class="card-title">Événements récents</div><div id="dash-events"></div></div>
+        <div class="card"><div class="card-title">📬 Demandes en attente</div><div id="dash-requests"></div></div>
       </div>
     </div>
 
     <!-- EVENTS -->
     <div class="page" id="page-events">
       <div class="page-header">
-        <div>
-          <div class="page-title">Événements</div>
-          <div class="page-sub">Gérez tous vos événements sportifs</div>
-        </div>
+        <div><div class="page-title">Événements</div><div class="page-sub">Gérez tous vos événements</div></div>
         <button class="btn btn-primary" onclick="openModal('modal-event')">+ Nouvel événement</button>
       </div>
       <div id="events-list"></div>
@@ -403,31 +280,27 @@
       <div class="page-header">
         <div>
           <div class="breadcrumb"><span onclick="showPage('events')">Événements</span> / <span id="pos-event-name"></span></div>
-          <div class="page-title">Postes</div>
-          <div class="page-sub">Définissez les postes de votre événement</div>
+          <div class="page-title">Postes & Créneaux</div>
         </div>
         <button class="btn btn-primary" onclick="openModal('modal-position')">+ Nouveau poste</button>
       </div>
-      <div class="card">
-        <div id="positions-list"></div>
-      </div>
+      <div id="positions-list"></div>
     </div>
 
-    <!-- VOLUNTEERS -->
-    <div class="page" id="page-volunteers">
+    <!-- VOLUNTEERS MGMT -->
+    <div class="page" id="page-volunteers-mgmt">
       <div class="page-header">
         <div>
           <div class="breadcrumb"><span onclick="showPage('events')">Événements</span> / <span id="vol-event-name"></span></div>
           <div class="page-title">Bénévoles</div>
-          <div class="page-sub">Gérez les bénévoles de l'événement</div>
         </div>
-        <div style="display:flex; gap:8px;">
-          <button class="btn btn-ghost" onclick="openModal('modal-import')">📥 Importer CSV</button>
-          <button class="btn btn-primary" onclick="openModal('modal-volunteer')">+ Ajouter</button>
+        <div class="header-actions">
+          <button class="btn btn-ghost" onclick="openModal('modal-import')">📥 Import CSV</button>
+          <button class="btn btn-primary" onclick="openModal('modal-add-vol')">+ Ajouter</button>
         </div>
       </div>
       <div class="card">
-        <div class="search-bar"><input type="text" id="vol-search" placeholder="Rechercher un bénévole..." oninput="filterVolunteers()"></div>
+        <div class="search-bar"><input type="text" id="vol-search" placeholder="Rechercher..." oninput="filterVols()"></div>
         <div id="volunteers-list"></div>
       </div>
     </div>
@@ -438,14 +311,28 @@
         <div>
           <div class="breadcrumb"><span onclick="showPage('events')">Événements</span> / <span id="asgn-event-name"></span></div>
           <div class="page-title">Affectations</div>
-          <div class="page-sub">Associez bénévoles et postes, envoyez les liens</div>
         </div>
         <button class="btn btn-primary" onclick="openModal('modal-assignment')">+ Affecter</button>
       </div>
       <div class="stats-row" id="asgn-stats"></div>
-      <div class="card">
-        <div id="assignments-list"></div>
+      <div class="card"><div id="assignments-list"></div></div>
+    </div>
+
+    <!-- REQUESTS -->
+    <div class="page" id="page-requests">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb"><span onclick="showPage('events')">Événements</span> / <span id="req-event-name"></span></div>
+          <div class="page-title">Demandes de participation</div>
+        </div>
+        <button class="btn btn-ghost" onclick="loadRequests()">🔄 Actualiser</button>
       </div>
+      <div class="tabs">
+        <button class="tab active" onclick="filterRequests('pending')" id="tab-pending">⏳ En attente</button>
+        <button class="tab" onclick="filterRequests('accepted')" id="tab-accepted">✅ Acceptées</button>
+        <button class="tab" onclick="filterRequests('declined')" id="tab-declined">❌ Refusées</button>
+      </div>
+      <div id="requests-list"></div>
     </div>
 
     <!-- CONFIRMATIONS -->
@@ -454,42 +341,97 @@
         <div>
           <div class="breadcrumb"><span onclick="showPage('events')">Événements</span> / <span id="conf-event-name"></span></div>
           <div class="page-title">Confirmations</div>
-          <div class="page-sub">Suivi des réponses des bénévoles en temps réel</div>
         </div>
         <button class="btn btn-ghost" onclick="loadConfirmations()">🔄 Actualiser</button>
       </div>
       <div class="stats-row" id="conf-stats"></div>
-      <div class="card">
-        <div id="confirmations-list"></div>
+      <div class="card"><div id="confirmations-list"></div></div>
+    </div>
+
+    <!-- BALISAGE -->
+    <div class="page" id="page-balisage">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb"><span onclick="showPage('events')">Événements</span> / <span id="bal-event-name"></span></div>
+          <div class="page-title">Suivi Balisage</div>
+          <div class="page-sub">Statut en temps réel</div>
+        </div>
+        <button class="btn btn-ghost" onclick="loadBalisage()">🔄 Actualiser</button>
       </div>
+      <div class="card"><div id="balisage-list"></div></div>
+    </div>
+
+    <!-- POINTAGE -->
+    <div class="page" id="page-pointage">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb"><span onclick="showPage('events')">Événements</span> / <span id="pt-event-name"></span></div>
+          <div class="page-title">Pointage Jour J</div>
+        </div>
+        <button class="btn btn-ghost" onclick="loadPointage()">🔄 Actualiser</button>
+      </div>
+      <div class="stats-row" id="pt-stats"></div>
+      <div class="card"><div id="pointage-list"></div></div>
+    </div>
+
+    <!-- ADMIN USERS -->
+    <div class="page" id="page-admin-users">
+      <div class="page-header">
+        <div><div class="page-title">Gestion des utilisateurs</div><div class="page-sub">Gérez les rôles et accès</div></div>
+      </div>
+      <div class="card">
+        <div class="search-bar"><input type="text" id="users-search" placeholder="Rechercher un utilisateur..." oninput="filterUsers()"></div>
+        <div id="users-list"></div>
+      </div>
+    </div>
+
+    <!-- ADMIN NOTIFS -->
+    <div class="page" id="page-admin-notifs">
+      <div class="page-header">
+        <div><div class="page-title">Emails & Notifications</div></div>
+        <button class="btn btn-primary" onclick="processNotifs()">▶ Traiter les emails en attente</button>
+      </div>
+      <div class="card"><div id="notifs-list"></div></div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div class="page" id="page-messages">
+      <div class="page-header">
+        <div><div class="page-title">Messages</div></div>
+        <button class="btn btn-primary" onclick="openModal('modal-message')">+ Nouveau message</button>
+      </div>
+      <div class="card"><div id="messages-list"></div></div>
     </div>
 
   </main>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════ -->
-<!-- MODALS -->
-<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- ═══ MODALS ═══ -->
 
-<!-- EVENT MODAL -->
+<!-- EVENT -->
 <div class="modal-overlay" id="modal-event">
-  <div class="modal">
+  <div class="modal modal-lg">
     <div class="modal-title" id="event-modal-title">Nouvel événement</div>
     <input type="hidden" id="event-id">
-    <div class="field"><label>Nom de l'événement *</label><input type="text" id="event-name" placeholder="SwimRun Verdon 2026"></div>
-    <div class="field"><label>Description</label><textarea id="event-desc" placeholder="Description de l'événement..."></textarea></div>
-    <div class="field"><label>Lieu</label><input type="text" id="event-loc" placeholder="Lac de Sainte-Croix, Verdon"></div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-      <div class="field"><label>Date début *</label><input type="date" id="event-start"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="field" style="grid-column:1/-1"><label>Nom *</label><input type="text" id="event-name" placeholder="SwimRun Verdon 2027"></div>
+      <div class="field" style="grid-column:1/-1"><label>Description</label><textarea id="event-desc"></textarea></div>
+      <div class="field"><label>Lieu</label><input type="text" id="event-loc" placeholder="Lac de Sainte-Croix"></div>
+      <div class="field"><label>Statut</label>
+        <select id="event-status"><option value="brouillon">Brouillon</option><option value="publié">Publié</option><option value="terminé">Terminé</option></select>
+      </div>
+      <div class="field"><label>Date début</label><input type="date" id="event-start"></div>
       <div class="field"><label>Date fin</label><input type="date" id="event-end"></div>
+      <div class="field"><label>Date limite inscription</label><input type="date" id="event-deadline"></div>
+      <div class="field"><label>Max bénévoles</label><input type="number" id="event-max" placeholder="100"></div>
+      <div class="field"><label>Email contact</label><input type="email" id="event-contact-email"></div>
+      <div class="field"><label>Téléphone contact</label><input type="tel" id="event-contact-phone"></div>
+      <div class="field" style="grid-column:1/-1;display:flex;align-items:center;gap:10px">
+        <input type="checkbox" id="event-public" style="width:auto" checked>
+        <label style="text-transform:none;letter-spacing:0;margin:0">Événement visible publiquement (portail bénévoles)</label>
+      </div>
     </div>
-    <div class="field"><label>Statut</label>
-      <select id="event-status">
-        <option value="brouillon">Brouillon</option>
-        <option value="publié">Publié</option>
-        <option value="terminé">Terminé</option>
-      </select>
-    </div>
+    <div class="field"><label>Organisateurs assignés (emails, séparés par virgule)</label><input type="text" id="event-orgs" placeholder="orga@email.fr, co-orga@email.fr"></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-event')">Annuler</button>
       <button class="btn btn-primary" onclick="saveEvent()">Enregistrer</button>
@@ -497,29 +439,29 @@
   </div>
 </div>
 
-<!-- POSITION MODAL -->
+<!-- POSITION -->
 <div class="modal-overlay" id="modal-position">
-  <div class="modal">
+  <div class="modal modal-lg">
     <div class="modal-title" id="pos-modal-title">Nouveau poste</div>
     <input type="hidden" id="pos-id">
-    <div class="field"><label>Nom du poste *</label><input type="text" id="pos-name" placeholder="Ravitaillement km10"></div>
-    <div class="field"><label>Type</label>
-      <select id="pos-type">
-        <option>Ravitaillement</option>
-        <option>Sécurité</option>
-        <option>Signaleur</option>
-        <option>Parking</option>
-        <option>Balisage</option>
-        <option>Arrivée</option>
-        <option>Accueil</option>
-        <option>Chronométrage</option>
-        <option>Médical</option>
-        <option>Autre</option>
-      </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="field" style="grid-column:1/-1"><label>Nom du poste *</label><input type="text" id="pos-name" placeholder="Ravitaillement km10"></div>
+      <div class="field"><label>Type</label>
+        <select id="pos-type">
+          <option>Ravitaillement</option><option>Sécurité</option><option>Balisage</option>
+          <option>Signaleur</option><option>Parking</option><option>Arrivée</option>
+          <option>Accueil</option><option>Chronométrage</option><option>Médical</option><option>Autre</option>
+        </select>
+      </div>
+      <div class="field"><label>Bénévoles requis (total)</label><input type="number" id="pos-count" value="1" min="1"></div>
+      <div class="field" style="grid-column:1/-1"><label>Description / Instructions</label><textarea id="pos-desc"></textarea></div>
+      <div class="field" style="grid-column:1/-1"><label>Matériel nécessaire</label><textarea id="pos-material" placeholder="Gilet jaune, talkie-walkie..."></textarea></div>
     </div>
-    <div class="field"><label>Description</label><textarea id="pos-desc" placeholder="Instructions pour ce poste..."></textarea></div>
-    <div class="field"><label>Matériel nécessaire</label><textarea id="pos-material" placeholder="Gilet jaune, talkie-walkie..."></textarea></div>
-    <div class="field"><label>Nombre de bénévoles requis</label><input type="number" id="pos-count" value="1" min="1"></div>
+    <div style="margin-top:8px">
+      <div style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">⏰ Créneaux horaires</div>
+      <div id="slots-container"></div>
+      <button class="btn btn-ghost" style="font-size:13px" onclick="addSlotRow()">+ Ajouter un créneau</button>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-position')">Annuler</button>
       <button class="btn btn-primary" onclick="savePosition()">Enregistrer</button>
@@ -527,34 +469,30 @@
   </div>
 </div>
 
-<!-- VOLUNTEER MODAL -->
-<div class="modal-overlay" id="modal-volunteer">
+<!-- ADD VOLUNTEER (manual) -->
+<div class="modal-overlay" id="modal-add-vol">
   <div class="modal">
     <div class="modal-title" id="vol-modal-title">Ajouter un bénévole</div>
     <input type="hidden" id="vol-id">
     <div class="field"><label>Nom complet *</label><input type="text" id="vol-name" placeholder="Jean Dupont"></div>
-    <div class="field"><label>Email <small style="color:var(--muted)">(optionnel)</small></label><input type="email" id="vol-email" placeholder="jean@exemple.fr"></div>
-    <div class="field"><label>Téléphone <small style="color:var(--muted)">(optionnel)</small></label><input type="tel" id="vol-phone" placeholder="06 12 34 56 78"></div>
-    <div class="field"><label>Notes / Compétences</label><textarea id="vol-notes" placeholder="PSC1, permis bateau, kayak sécurité, véhicule..."></textarea></div>
+    <div class="field"><label>Email</label><input type="email" id="vol-email"></div>
+    <div class="field"><label>Téléphone</label><input type="tel" id="vol-phone"></div>
+    <div class="field"><label>Notes / Compétences</label><textarea id="vol-notes" placeholder="PSC1, permis bateau..."></textarea></div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-volunteer')">Annuler</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-vol')">Annuler</button>
       <button class="btn btn-primary" onclick="saveVolunteer()">Enregistrer</button>
     </div>
   </div>
 </div>
 
-<!-- IMPORT CSV MODAL -->
+<!-- IMPORT CSV -->
 <div class="modal-overlay" id="modal-import">
   <div class="modal">
-    <div class="modal-title">Importer des bénévoles (CSV)</div>
-    <div class="alert alert-info">
-      Format attendu : <b>nom,email,telephone,notes</b><br>
-      La première ligne (en-têtes) sera ignorée automatiquement.
-    </div>
+    <div class="modal-title">Import CSV</div>
+    <div class="alert alert-info">Format : <b>nom,email,telephone,notes</b> — 1ère ligne ignorée si en-têtes</div>
     <div class="field"><label>Fichier CSV</label><input type="file" id="csv-file" accept=".csv"></div>
     <div id="csv-preview" style="display:none">
-      <div style="font-size:13px; color:var(--muted); margin-bottom:8px;" id="csv-count"></div>
-      <div class="table-wrap" style="max-height:200px; overflow-y:auto; font-size:13px;" id="csv-table"></div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:8px" id="csv-count"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-import')">Annuler</button>
@@ -563,16 +501,14 @@
   </div>
 </div>
 
-<!-- ASSIGNMENT MODAL -->
+<!-- ASSIGNMENT -->
 <div class="modal-overlay" id="modal-assignment">
   <div class="modal">
     <div class="modal-title">Affecter un bénévole</div>
-    <div class="field"><label>Bénévole *</label>
-      <select id="asgn-vol-id"><option value="">-- Choisir --</option></select>
-    </div>
-    <div class="field"><label>Poste *</label>
-      <select id="asgn-pos-id"><option value="">-- Choisir --</option></select>
-    </div>
+    <div class="field"><label>Bénévole *</label><select id="asgn-vol-id"><option value="">— Choisir —</option></select></div>
+    <div class="field"><label>Poste *</label><select id="asgn-pos-id" onchange="loadSlotOptions()"><option value="">— Choisir —</option></select></div>
+    <div class="field" id="slot-field" style="display:none"><label>Créneau</label><select id="asgn-slot-id"><option value="">— Pas de créneau —</option></select></div>
+    <div class="field"><label>Notes</label><textarea id="asgn-notes" placeholder="Instructions spécifiques..."></textarea></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-assignment')">Annuler</button>
       <button class="btn btn-primary" onclick="saveAssignment()">Affecter</button>
@@ -580,729 +516,917 @@
   </div>
 </div>
 
-<!-- LINK MODAL -->
+<!-- LINK -->
 <div class="modal-overlay" id="modal-link">
   <div class="modal">
-    <div class="modal-title">📨 Lien bénévole généré</div>
-    <div style="font-size:14px; color:var(--muted); margin-bottom:16px;">Partagez ce lien avec le bénévole par email, SMS ou WhatsApp.</div>
-    <div id="link-volunteer-info" style="font-size:15px; font-weight:600; margin-bottom:12px;"></div>
-    <div class="link-box" id="link-url"></div>
-    <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
-      <button class="btn btn-primary" onclick="copyLink()">📋 Copier le lien</button>
-      <button class="btn btn-green" onclick="openWhatsApp()">💬 WhatsApp</button>
+    <div class="modal-title">📨 Lien bénévole</div>
+    <div id="link-info" style="font-size:15px;font-weight:600;margin-bottom:12px"></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;font-family:monospace;color:var(--primary);word-break:break-all;margin-bottom:14px" id="link-url"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="copyLink()">📋 Copier</button>
+      <button class="btn btn-green" onclick="openWA()">💬 WhatsApp</button>
       <button class="btn btn-ghost" onclick="openEmail()">📧 Email</button>
+      <button class="btn btn-blue" onclick="printFiche()">🖨️ Fiche poste</button>
     </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-link')">Fermer</button></div>
+  </div>
+</div>
+
+<!-- RESPOND REQUEST -->
+<div class="modal-overlay" id="modal-respond">
+  <div class="modal">
+    <div class="modal-title" id="respond-title">Répondre à la demande</div>
+    <input type="hidden" id="respond-id">
+    <div id="respond-info" style="margin-bottom:16px"></div>
+    <div class="field"><label>Poste assigné</label><select id="respond-pos"><option value="">— Choisir un poste —</option></select></div>
+    <div class="field"><label>Créneau</label><select id="respond-slot"><option value="">— Pas de créneau —</option></select></div>
+    <div class="field"><label>Message à envoyer au bénévole</label><textarea id="respond-note" placeholder="Merci pour votre inscription ! Vous serez sur le poste..."></textarea></div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-link')">Fermer</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-respond')">Annuler</button>
+      <button class="btn btn-danger" onclick="respondRequest('declined')">❌ Refuser</button>
+      <button class="btn btn-green" onclick="respondRequest('accepted')">✅ Accepter</button>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGE -->
+<div class="modal-overlay" id="modal-message">
+  <div class="modal">
+    <div class="modal-title">Nouveau message</div>
+    <div class="field"><label>Événement</label><select id="msg-event-id"><option value="">— Général —</option></select></div>
+    <div class="field"><label>Destinataire</label><select id="msg-recipient"><option value="">— Tous les bénévoles de l'événement —</option></select></div>
+    <div class="field"><label>Message *</label><textarea id="msg-content" placeholder="Votre message..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-message')">Annuler</button>
+      <button class="btn btn-primary" onclick="sendMessage()">Envoyer</button>
     </div>
   </div>
 </div>
 
 <div id="toast"></div>
 
-<!-- ═══════════════════════════════════════════════════════════ -->
-<!-- JAVASCRIPT -->
-<!-- ═══════════════════════════════════════════════════════════ -->
 <script>
-// ─── CONFIG ──────────────────────────────────────────────────
-let SUPABASE_URL = 'https://zchybozcpzelmjqymudp.supabase.co';
-let SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjaHlib3pjcHplbG1qcXltdWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDE2MDAsImV4cCI6MjA4ODIxNzYwMH0.N2qnJgMNq5PzQ_42Pd7vgf47GmWVEQ8pBHMLKelLEp8';
-let SESSION_TOKEN = null; // token JWT de session après login
-let currentUser = null;
+const SB_URL = 'https://zchybozcpzelmjqymudp.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjaHlib3pjcHplbG1qcXltdWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDE2MDAsImV4cCI6MjA4ODIxNzYwMH0.N2qnJgMNq5PzQ_42Pd7vgf47GmWVEQ8pBHMLKelLEp8';
+let SESSION = null;
+let ME = null; // profile complet
 let currentEvent = null;
-let allVolunteers = [];
+let allVols = [], allPos = [], allSlots = [], allRequests = [];
 let currentLinkData = {};
+let csvData = [];
 
-// ─── SUPABASE API ─────────────────────────────────────────────
-async function sbFetch(path, method = 'GET', body = null, extra = {}) {
-  const headers = {
-    'apikey': SUPABASE_ANON_KEY,
-    'Authorization': `Bearer ${SESSION_TOKEN || SUPABASE_ANON_KEY}`,
+// ─── API ──────────────────────────────────────────────────────
+async function api(path, method='GET', body=null, extra={}) {
+  const h = {
+    'apikey': SB_ANON,
+    'Authorization': `Bearer ${SESSION||SB_ANON}`,
     'Content-Type': 'application/json',
     'Prefer': 'return=representation',
     ...extra
   };
-  const opts = { method, headers };
-  if (body) opts.body = JSON.stringify(body);
-  const r = await fetch(SUPABASE_URL + path, opts);
-  const text = await r.text();
-  if (!r.ok) throw new Error(text);
-  return text ? JSON.parse(text) : [];
+  const r = await fetch(SB_URL+path, {method, headers:h, body:body?JSON.stringify(body):null});
+  const t = await r.text();
+  if (!r.ok) throw new Error(t);
+  return t ? JSON.parse(t) : [];
 }
-
-async function sbGet(table, query = '') {
-  return sbFetch(`/rest/v1/${table}?${query}`);
-}
-async function sbPost(table, data) {
-  return sbFetch(`/rest/v1/${table}`, 'POST', data);
-}
-async function sbPatch(table, query, data) {
-  return sbFetch(`/rest/v1/${table}?${query}`, 'PATCH', data);
-}
-async function sbDelete(table, query) {
-  return sbFetch(`/rest/v1/${table}?${query}`, 'DELETE', null, { 'Prefer': '' });
-}
+const get  = (t,q='') => api(`/rest/v1/${t}?${q}`);
+const post = (t,d)    => api(`/rest/v1/${t}`,'POST',d);
+const patch= (t,q,d)  => api(`/rest/v1/${t}?${q}`,'PATCH',d);
+const del  = (t,q)    => api(`/rest/v1/${t}?${q}`,'DELETE',null,{'Prefer':''});
 
 // ─── AUTH ─────────────────────────────────────────────────────
 async function login() {
-  const email = document.getElementById('login-email').value.trim();
-  const pwd = document.getElementById('login-password').value;
-  if (!email || !pwd) return showAuthError('auth-error', 'Remplissez tous les champs');
-  setBtnLoading('login-btn', true);
+  const email = v('login-email'), pwd = v('login-password');
+  if (!email||!pwd) return authErr('auth-error','Remplissez tous les champs');
+  setLoad('login-btn',true);
   try {
-    const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-      method: 'POST',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: pwd })
+    const r = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`,{
+      method:'POST', headers:{'apikey':SB_ANON,'Content-Type':'application/json'},
+      body: JSON.stringify({email,password:pwd})
     });
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error_description || data.msg || 'Erreur');
-    SESSION_TOKEN = data.access_token; // on stocke le token de session séparément
-    currentUser = { email, id: data.user.id };
-    document.getElementById('user-email-display').textContent = email;
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    loadDashboard();
-  } catch(e) {
-    showAuthError('auth-error', e.message);
-  } finally {
-    setBtnLoading('login-btn', false);
-  }
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error_description||d.msg||'Erreur');
+    SESSION = d.access_token;
+    await loadProfile(d.user.id, email);
+    startApp();
+  } catch(e) { authErr('auth-error',e.message); }
+  finally { setLoad('login-btn',false); }
 }
 
 async function register() {
-  const email = document.getElementById('reg-email').value.trim();
-  const pwd = document.getElementById('reg-password').value;
-  if (!email || !pwd) return showAuthError('reg-error', 'Remplissez tous les champs');
-  if (pwd.length < 6) return showAuthError('reg-error', 'Mot de passe trop court (min. 6 caractères)');
-  setBtnLoading('reg-btn', true);
+  const name=v('reg-name'), email=v('reg-email'), pwd=v('reg-pwd');
+  if (!name||!email||!pwd) return authErr('reg-error','Remplissez tous les champs');
+  if (pwd.length<6) return authErr('reg-error','Mot de passe trop court');
+  setLoad('reg-btn',true);
   try {
-    const r = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-      method: 'POST',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: pwd })
+    const r = await fetch(`${SB_URL}/auth/v1/signup`,{
+      method:'POST', headers:{'apikey':SB_ANON,'Content-Type':'application/json'},
+      body: JSON.stringify({email,password:pwd,data:{full_name:name}})
     });
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.msg || 'Erreur');
-    showAuthError('reg-error', '✅ Compte créé ! Vérifiez votre email pour confirmer puis connectez-vous.', false);
-    setTimeout(() => showLogin(), 2000);
-  } catch(e) {
-    showAuthError('reg-error', e.message);
-  } finally {
-    setBtnLoading('reg-btn', false);
-  }
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.msg||'Erreur');
+    // Auto-login si pas de confirmation email requise
+    if (d.access_token) {
+      SESSION = d.access_token;
+      await loadProfile(d.user.id, email, name);
+      startApp();
+    } else {
+      authErr('reg-error','✅ Compte créé ! Vérifiez votre email puis connectez-vous.', false);
+      setTimeout(showLogin, 2500);
+    }
+  } catch(e) { authErr('reg-error',e.message); }
+  finally { setLoad('reg-btn',false); }
+}
+
+async function loadProfile(uid, email, name='') {
+  try {
+    const rows = await get('profiles',`id=eq.${uid}`);
+    if (rows.length) {
+      ME = rows[0];
+    } else {
+      const inserted = await post('profiles',{id:uid,email,full_name:name,role:'benevole'});
+      ME = Array.isArray(inserted)?inserted[0]:inserted;
+    }
+    if (name && ME && !ME.full_name) {
+      await patch('profiles',`id=eq.${uid}`,{full_name:name});
+      ME.full_name = name;
+    }
+  } catch(e) { ME = {id:uid,email,role:'benevole',full_name:name||email}; }
+}
+
+function startApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  // Afficher infos user
+  const role = ME?.role||'benevole';
+  document.getElementById('user-name').textContent = ME?.full_name || ME?.email || '—';
+  document.getElementById('user-role-display').textContent = {admin:'⚡ Admin',organisateur:'🎯 Organisateur',co_organisateur:'🤝 Co-organisateur',benevole:'🙋 Bénévole'}[role]||role;
+  document.getElementById('user-avatar').textContent = (ME?.full_name||'?')[0].toUpperCase();
+  // Afficher nav admin
+  if (role==='admin') document.getElementById('admin-nav').style.display='block';
+  // Si bénévole, rediriger
+  if (role==='benevole') { window.location.href='portail.html'; return; }
+  loadDashboard();
 }
 
 function logout() {
-  SESSION_TOKEN = null;
-  currentUser = null; currentEvent = null;
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('auth-screen').style.display = 'flex';
+  SESSION=null; ME=null; currentEvent=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('auth-screen').style.display='flex';
   showLogin();
 }
+function showLogin(){ show('login-view'); hide('reg-view'); }
+function showReg(){ hide('login-view'); show('reg-view'); }
 
-function showAuthError(id, msg, isError = true) {
-  const el = document.getElementById(id);
-  el.textContent = msg;
-  el.style.display = 'block';
-  el.className = isError ? 'alert alert-error' : 'alert alert-info';
-}
-
-function showLogin() {
-  document.getElementById('login-view').style.display = 'block';
-  document.getElementById('register-view').style.display = 'none';
-  document.getElementById('setup-view').style.display = 'none';
-}
-function showRegister() {
-  document.getElementById('login-view').style.display = 'none';
-  document.getElementById('register-view').style.display = 'block';
-}
-function showSetup() {
-  document.getElementById('login-view').style.display = 'none';
-  document.getElementById('setup-view').style.display = 'block';
-}
-function saveConfig() {
-  const url = document.getElementById('setup-url').value.trim().replace(/\/$/, '');
-  const key = document.getElementById('setup-key').value.trim();
-  if (!url || !key) return toast('Remplissez les deux champs', 'error');
-  localStorage.setItem('sb_url', url);
-  localStorage.setItem('sb_key', key);
-  SUPABASE_URL = url; SUPABASE_ANON_KEY = key;
-  showLogin();
-  toast('Configuration enregistrée !', 'success');
+// ─── NAV ──────────────────────────────────────────────────────
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p)?.classList.add('active');
+  document.getElementById('nav-'+p)?.classList.add('active');
+  const fn={dashboard:loadDashboard,events:loadEvents,positions:loadPositions,
+    'volunteers-mgmt':loadVolsMgmt,assignments:loadAssignments,requests:loadRequests,
+    confirmations:loadConfirmations,balisage:loadBalisage,pointage:loadPointage,
+    'admin-users':loadAdminUsers,'admin-notifs':loadAdminNotifs,messages:loadMessages};
+  if(fn[p]) fn[p]();
 }
 
-// ─── NAVIGATION ───────────────────────────────────────────────
-function showPage(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  const nav = document.getElementById('nav-' + page);
-  if (nav) nav.classList.add('active');
-  const handlers = {
-    dashboard: loadDashboard,
-    events: loadEvents,
-    positions: loadPositions,
-    volunteers: loadVolunteers,
-    assignments: loadAssignments,
-    confirmations: loadConfirmations,
-  };
-  if (handlers[page]) handlers[page]();
-}
-
-function setActiveEvent(event) {
-  currentEvent = event;
-  document.getElementById('event-nav-group').style.display = 'block';
-  document.getElementById('event-nav-label').textContent = event.name.substring(0, 22) + (event.name.length > 22 ? '…' : '');
+function setActiveEvent(e) {
+  currentEvent = e;
+  document.getElementById('event-nav').style.display='block';
+  document.getElementById('event-nav-name').textContent = e.name.substring(0,20)+(e.name.length>20?'…':'');
 }
 
 // ─── DASHBOARD ────────────────────────────────────────────────
 async function loadDashboard() {
+  const h = new Date().getHours();
+  document.getElementById('dash-greeting').textContent =
+    `Bonjour ${ME?.full_name?.split(' ')[0]||''} — ${h<12?'Bonne matinée':h<18?'Bon après-midi':'Bonne soirée'} !`;
   try {
-    const events = await sbGet('events', 'order=created_at.desc');
-    const stats = document.getElementById('dash-stats');
-    const published = events.filter(e => e.status === 'publié').length;
-    stats.innerHTML = `
+    const [events,requests] = await Promise.all([
+      get('events','order=created_at.desc&limit=6'),
+      get('volunteer_requests','status=eq.pending&order=created_at.desc&limit=5')
+    ]);
+    const pending = requests.length;
+    if (pending>0) {
+      document.getElementById('requests-badge').textContent=pending;
+      document.getElementById('requests-badge').style.display='inline';
+    }
+    document.getElementById('dash-stats').innerHTML = `
       <div class="stat-card"><div class="stat-value">${events.length}</div><div class="stat-label">Événements</div></div>
-      <div class="stat-card"><div class="stat-value">${published}</div><div class="stat-label">Publiés</div></div>
-    `;
-    const el = document.getElementById('dash-events');
-    if (!events.length) {
-      el.innerHTML = `<div class="empty-state"><div class="icon">📅</div><p>Aucun événement. Créez-en un !</p></div>`;
+      <div class="stat-card"><div class="stat-value" style="color:var(--green)">${events.filter(e=>e.status==='publié').length}</div><div class="stat-label">Publiés</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--yellow)">${pending}</div><div class="stat-label">Demandes en attente</div></div>`;
+    // Events
+    document.getElementById('dash-events').innerHTML = events.length
+      ? '<div class="events-grid">'+events.map(e=>miniEventCard(e)).join('')+'</div>'
+      : '<div class="empty-state"><div class="icon">📅</div><p>Aucun événement</p></div>';
+    // Requests
+    if (!requests.length) {
+      document.getElementById('dash-requests').innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px">Aucune demande en attente</div>';
       return;
     }
-    el.innerHTML = '<div class="events-grid">' + events.slice(0,6).map(e => eventCardHTML(e)).join('') + '</div>';
-  } catch(err) { showError('dash-stats', err); }
+    const vids = [...new Set(requests.map(r=>r.volunteer_id))];
+    const vols = await get('profiles',`id=in.(${vids.join(',')})&select=id,full_name,email`);
+    const eids = [...new Set(requests.map(r=>r.event_id))];
+    const evs = await get('events',`id=in.(${eids.join(',')})&select=id,name`);
+    const vm = Object.fromEntries(vols.map(v=>[v.id,v]));
+    const em = Object.fromEntries(evs.map(e=>[e.id,e]));
+    document.getElementById('dash-requests').innerHTML = requests.map(r=>`
+      <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="font-weight:600;font-size:14px">${esc(vm[r.volunteer_id]?.full_name||'?')}</div>
+        <div style="font-size:12px;color:var(--muted)">${esc(em[r.event_id]?.name||'?')}</div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="btn btn-green" style="font-size:12px;padding:5px 10px" onclick="quickAccept('${r.id}')">✅ Accepter</button>
+          <button class="btn btn-danger" style="font-size:12px;padding:5px 10px" onclick="quickDecline('${r.id}')">❌ Refuser</button>
+        </div>
+      </div>`).join('');
+  } catch(e){ console.error(e); }
 }
 
-function eventCardHTML(e) {
-  const statusClass = { brouillon:'badge-draft', 'publié':'badge-published', 'terminé':'badge-done' }[e.status] || 'badge-draft';
-  const date = e.start_date ? new Date(e.start_date).toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'}) : '—';
+function miniEventCard(e) {
+  const sc = {brouillon:'badge-draft',publié:'badge-published',terminé:'badge-done'}[e.status]||'badge-draft';
+  const d = e.start_date ? new Date(e.start_date).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}) : '—';
   return `<div class="event-card" onclick="selectEvent('${e.id}')">
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
       <div class="event-name">${esc(e.name)}</div>
-      <span class="badge ${statusClass}">${e.status}</span>
+      <span class="badge ${sc}">${e.status}</span>
     </div>
-    <div class="event-meta">
-      <div>📅 <b>${date}</b></div>
-      <div>📍 ${esc(e.location || '—')}</div>
+    <div class="event-meta"><div>📅 ${d}</div><div>📍 ${esc(e.location||'—')}</div></div>
+    <div style="display:flex;gap:6px;margin-top:12px">
+      <button class="btn btn-ghost" style="font-size:12px;padding:5px 10px" onclick="event.stopPropagation();editEvent('${e.id}')">✏️</button>
+      <button class="btn btn-primary" style="font-size:12px;padding:5px 10px;flex:1" onclick="event.stopPropagation();selectEvent('${e.id}')">Gérer →</button>
     </div>
   </div>`;
 }
 
 async function selectEvent(id) {
-  const events = await sbGet('events', `id=eq.${id}`);
-  if (events[0]) { setActiveEvent(events[0]); showPage('positions'); }
+  const rows = await get('events',`id=eq.${id}`);
+  if (rows[0]) { setActiveEvent(rows[0]); showPage('positions'); }
 }
 
 // ─── EVENTS ───────────────────────────────────────────────────
 async function loadEvents() {
   try {
-    const events = await sbGet('events', 'order=created_at.desc');
+    const events = await get('events','order=created_at.desc');
     const el = document.getElementById('events-list');
-    if (!events.length) {
-      el.innerHTML = `<div class="empty-state"><div class="icon">📅</div><p>Aucun événement.</p><button class="btn btn-primary" onclick="openModal('modal-event')">+ Créer un événement</button></div>`;
-      return;
-    }
-    el.innerHTML = '<div class="events-grid">' + events.map(e => eventCardHTML(e) + '').join('') + '</div>';
-    // Add edit buttons
-    setTimeout(() => {
-      events.forEach(e => {
-        const card = document.querySelector(`[onclick="selectEvent('${e.id}')"]`);
-        if (!card) return;
-        const actions = document.createElement('div');
-        actions.style.cssText = 'display:flex; gap:6px; margin-top:12px;';
-        actions.innerHTML = `
-          <button class="btn btn-ghost" style="font-size:12px; padding:6px 12px;" onclick="event.stopPropagation(); editEvent('${e.id}')">✏️ Modifier</button>
-          <button class="btn btn-danger" style="font-size:12px; padding:6px 12px;" onclick="event.stopPropagation(); deleteEvent('${e.id}')">🗑️</button>
-          <button class="btn btn-primary" style="font-size:12px; padding:6px 12px; flex:1;" onclick="event.stopPropagation(); selectEvent('${e.id}')">Gérer →</button>
-        `;
-        card.appendChild(actions);
-      });
-    }, 50);
-  } catch(err) { showError('events-list', err); }
+    if (!events.length) { el.innerHTML=emptyState('📅','Aucun événement','<button class="btn btn-primary" onclick="openModal(\'modal-event\')">+ Créer un événement</button>'); return; }
+    el.innerHTML = '<div class="events-grid">'+events.map(e=>miniEventCard(e)).join('')+'</div>';
+  } catch(e){ errEl('events-list',e); }
 }
 
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(m => {
-  m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
-});
-
 async function saveEvent() {
-  const id = document.getElementById('event-id').value;
+  const id = v('event-id');
   const data = {
-    name: document.getElementById('event-name').value.trim(),
-    description: document.getElementById('event-desc').value.trim(),
-    location: document.getElementById('event-loc').value.trim(),
-    start_date: document.getElementById('event-start').value || null,
-    end_date: document.getElementById('event-end').value || null,
-    status: document.getElementById('event-status').value,
+    name:v('event-name'), description:v('event-desc'), location:v('event-loc'),
+    start_date:v('event-start')||null, end_date:v('event-end')||null,
+    registration_deadline:v('event-deadline')||null,
+    max_volunteers:parseInt(v('event-max'))||null,
+    contact_email:v('event-contact-email')||null, contact_phone:v('event-contact-phone')||null,
+    status:v('event-status'),
+    is_public:document.getElementById('event-public').checked,
   };
-  if (!data.name) return toast('Le nom est obligatoire', 'error');
+  if (!data.name) return toast('Nom obligatoire','error');
   try {
-    if (id) {
-      await sbPatch('events', `id=eq.${id}`, data);
-    } else {
-      data.user_id = currentUser?.id;
-      await sbPost('events', data);
+    let eventId = id;
+    if (id) { await patch('events',`id=eq.${id}`,data); }
+    else { data.user_id=ME.id; const r=await post('events',data); eventId=r[0]?.id||r.id; }
+    // Assign organizers
+    const orgsRaw = v('event-orgs').trim();
+    if (orgsRaw && eventId) {
+      const emails = orgsRaw.split(',').map(s=>s.trim()).filter(Boolean);
+      for (const email of emails) {
+        const users = await get('profiles',`email=eq.${email}&select=id`);
+        if (users[0]) {
+          try { await post('event_organizers',{event_id:eventId,user_id:users[0].id,role:'co_organisateur'}); } catch(e){}
+        }
+      }
     }
-    closeModal('modal-event');
-    clearEventForm();
-    toast('Événement enregistré !', 'success');
+    closeModal('modal-event'); clearEventForm(); toast('Événement enregistré !','success');
     loadEvents(); loadDashboard();
-  } catch(e) { toast('Erreur : ' + e.message, 'error'); }
+  } catch(e){ toast('Erreur : '+e.message,'error'); }
 }
 
 async function editEvent(id) {
-  const [e] = await sbGet('events', `id=eq.${id}`);
-  document.getElementById('event-id').value = e.id;
-  document.getElementById('event-name').value = e.name;
-  document.getElementById('event-desc').value = e.description || '';
-  document.getElementById('event-loc').value = e.location || '';
-  document.getElementById('event-start').value = e.start_date || '';
-  document.getElementById('event-end').value = e.end_date || '';
-  document.getElementById('event-status').value = e.status;
-  document.getElementById('event-modal-title').textContent = 'Modifier l\'événement';
+  const [e] = await get('events',`id=eq.${id}`);
+  sv('event-id',e.id); sv('event-name',e.name); sv('event-desc',e.description||'');
+  sv('event-loc',e.location||''); sv('event-start',e.start_date||''); sv('event-end',e.end_date||'');
+  sv('event-deadline',e.registration_deadline||''); sv('event-max',e.max_volunteers||'');
+  sv('event-contact-email',e.contact_email||''); sv('event-contact-phone',e.contact_phone||'');
+  sv('event-status',e.status); document.getElementById('event-public').checked=e.is_public!==false;
+  document.getElementById('event-modal-title').textContent='Modifier l\'événement';
   openModal('modal-event');
 }
-
-async function deleteEvent(id) {
-  if (!confirm('Supprimer cet événement ? Cette action est irréversible.')) return;
-  await sbDelete('events', `id=eq.${id}`);
-  toast('Événement supprimé', 'info');
-  loadEvents();
+function clearEventForm(){
+  ['event-id','event-name','event-desc','event-loc','event-start','event-end','event-deadline','event-max','event-contact-email','event-contact-phone','event-orgs'].forEach(f=>sv(f,''));
+  sv('event-status','brouillon'); document.getElementById('event-public').checked=true;
+  document.getElementById('event-modal-title').textContent='Nouvel événement';
 }
 
-function clearEventForm() {
-  ['event-id','event-name','event-desc','event-loc','event-start','event-end'].forEach(f => document.getElementById(f).value = '');
-  document.getElementById('event-status').value = 'brouillon';
-  document.getElementById('event-modal-title').textContent = 'Nouvel événement';
+// ─── POSITIONS & SLOTS ────────────────────────────────────────
+let slotRows = [];
+function addSlotRow(slot=null) {
+  const id = 'slot-'+Date.now();
+  slotRows.push(id);
+  const div = document.createElement('div');
+  div.id=id; div.style.cssText='display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center';
+  div.innerHTML=`
+    <input type="text" placeholder="Label (ex: Matin)" value="${esc(slot?.label||'')}">
+    <input type="date" value="${slot?.date||''}">
+    <input type="time" placeholder="Début" value="${slot?.start_time||''}">
+    <input type="time" placeholder="Fin" value="${slot?.end_time||''}">
+    <button class="btn btn-danger" style="padding:8px 10px" onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById('slots-container').appendChild(div);
 }
 
-// ─── POSITIONS ────────────────────────────────────────────────
 async function loadPositions() {
   if (!currentEvent) return;
-  document.getElementById('pos-event-name').textContent = currentEvent.name;
+  document.getElementById('pos-event-name').textContent=currentEvent.name;
   try {
-    const positions = await sbGet('positions', `event_id=eq.${currentEvent.id}&order=name.asc`);
+    const [positions,slots] = await Promise.all([
+      get('positions',`event_id=eq.${currentEvent.id}&order=name.asc`),
+      get('position_slots',`event_id=eq.${currentEvent.id}&order=start_time.asc`)
+    ]);
+    allPos=positions; allSlots=slots;
+    const slotsByPos = {};
+    slots.forEach(s=>{ if(!slotsByPos[s.position_id]) slotsByPos[s.position_id]=[]; slotsByPos[s.position_id].push(s); });
     const el = document.getElementById('positions-list');
-    if (!positions.length) {
-      el.innerHTML = `<div class="empty-state"><div class="icon">📍</div><p>Aucun poste défini.</p><button class="btn btn-primary" onclick="openModal('modal-position')">+ Créer un poste</button></div>`;
-      return;
-    }
-    el.innerHTML = `<div class="table-wrap"><table>
-      <thead><tr><th>Poste</th><th>Type</th><th>Bénévoles requis</th><th>Matériel</th><th>Actions</th></tr></thead>
-      <tbody>${positions.map(p => `
-        <tr>
-          <td><b>${esc(p.name)}</b>${p.description ? `<br><small style="color:var(--muted)">${esc(p.description)}</small>` : ''}</td>
-          <td><span class="badge badge-draft">${esc(p.type || '—')}</span></td>
-          <td style="text-align:center;">${p.required_count || 1}</td>
-          <td><small style="color:var(--muted)">${esc(p.material || '—')}</small></td>
-          <td><div class="td-actions">
-            <button class="btn btn-ghost" style="font-size:12px; padding:6px 10px;" onclick="editPosition('${p.id}')">✏️</button>
-            <button class="btn btn-danger" style="font-size:12px; padding:6px 10px;" onclick="deletePosition('${p.id}')">🗑️</button>
-          </div></td>
-        </tr>`).join('')}
-      </tbody></table></div>`;
-  } catch(e) { showError('positions-list', e); }
+    if (!positions.length) { el.innerHTML=emptyState('📍','Aucun poste','<button class="btn btn-primary" onclick="openModal(\'modal-position\')">+ Créer un poste</button>'); return; }
+    el.innerHTML = positions.map(p=>{
+      const ps = slotsByPos[p.id]||[];
+      return `<div class="card" style="margin-bottom:12px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div>
+            <div style="font-family:var(--fh);font-size:16px;font-weight:700">${esc(p.name)}</div>
+            <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
+              <span class="badge badge-draft">${esc(p.type||'')}</span>
+              <span style="font-size:13px;color:var(--muted)">${p.required_count||1} bénévole(s) requis</span>
+            </div>
+            ${p.description?`<div style="font-size:13px;color:var(--muted);margin-top:8px">${esc(p.description)}</div>`:''}
+            ${p.material?`<div style="font-size:12px;color:var(--muted);margin-top:4px">🎒 ${esc(p.material)}</div>`:''}
+          </div>
+          <div class="td-actions">
+            <button class="btn btn-ghost" style="font-size:12px;padding:6px 10px" onclick="editPosition('${p.id}')">✏️ Modifier</button>
+            <button class="btn btn-danger" style="font-size:12px;padding:6px 10px" onclick="deletePos('${p.id}')">🗑️</button>
+          </div>
+        </div>
+        ${ps.length?`<div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px">
+          ${ps.map(s=>`<div class="slot-chip">⏰ ${esc(s.label||'')} ${s.start_time?s.start_time.substring(0,5):''} ${s.end_time?'→ '+s.end_time.substring(0,5):''}</div>`).join('')}
+        </div>`:''}
+      </div>`;
+    }).join('');
+  } catch(e){ errEl('positions-list',e); }
 }
 
 async function savePosition() {
   if (!currentEvent) return;
-  const id = document.getElementById('pos-id').value;
-  const data = {
-    event_id: currentEvent.id,
-    name: document.getElementById('pos-name').value.trim(),
-    type: document.getElementById('pos-type').value,
-    description: document.getElementById('pos-desc').value.trim(),
-    material: document.getElementById('pos-material').value.trim(),
-    required_count: parseInt(document.getElementById('pos-count').value) || 1,
-  };
-  if (!data.name) return toast('Le nom du poste est obligatoire', 'error');
+  const id = v('pos-id');
+  const data = {event_id:currentEvent.id,name:v('pos-name'),type:v('pos-type'),description:v('pos-desc'),material:v('pos-material'),required_count:parseInt(v('pos-count'))||1};
+  if (!data.name) return toast('Nom obligatoire','error');
   try {
-    if (id) { await sbPatch('positions', `id=eq.${id}`, data); }
-    else { await sbPost('positions', data); }
-    closeModal('modal-position');
-    clearPosForm();
-    toast('Poste enregistré !', 'success');
-    loadPositions();
-  } catch(e) { toast('Erreur : ' + e.message, 'error'); }
+    let posId = id;
+    if (id) { await patch('positions',`id=eq.${id}`,data); }
+    else { const r=await post('positions',data); posId=r[0]?.id||r.id; }
+    // Save slots
+    if (!id) { // only for new positions (edit would need diff logic)
+      const rows = document.getElementById('slots-container').children;
+      for (const row of rows) {
+        const inputs = row.querySelectorAll('input');
+        const label=inputs[0].value, date=inputs[1].value, st=inputs[2].value, et=inputs[3].value;
+        if (label||st) {
+          await post('position_slots',{position_id:posId,event_id:currentEvent.id,label:label||null,date:date||null,start_time:st||null,end_time:et||null});
+        }
+      }
+    }
+    closeModal('modal-position'); clearPosForm(); toast('Poste enregistré !','success'); loadPositions();
+  } catch(e){ toast('Erreur : '+e.message,'error'); }
 }
 
 async function editPosition(id) {
-  const [p] = await sbGet('positions', `id=eq.${id}`);
-  document.getElementById('pos-id').value = p.id;
-  document.getElementById('pos-name').value = p.name;
-  document.getElementById('pos-type').value = p.type || 'Autre';
-  document.getElementById('pos-desc').value = p.description || '';
-  document.getElementById('pos-material').value = p.material || '';
-  document.getElementById('pos-count').value = p.required_count || 1;
-  document.getElementById('pos-modal-title').textContent = 'Modifier le poste';
+  const [p] = await get('positions',`id=eq.${id}`);
+  sv('pos-id',p.id); sv('pos-name',p.name); sv('pos-type',p.type||'Autre');
+  sv('pos-desc',p.description||''); sv('pos-material',p.material||''); sv('pos-count',p.required_count||1);
+  document.getElementById('pos-modal-title').textContent='Modifier le poste';
+  document.getElementById('slots-container').innerHTML=''; slotRows=[];
+  const slots = await get('position_slots',`position_id=eq.${id}`);
+  slots.forEach(s=>addSlotRow(s));
   openModal('modal-position');
 }
-
-async function deletePosition(id) {
+async function deletePos(id) {
   if (!confirm('Supprimer ce poste ?')) return;
-  await sbDelete('positions', `id=eq.${id}`);
-  toast('Poste supprimé', 'info');
-  loadPositions();
+  await del('positions',`id=eq.${id}`); toast('Poste supprimé','info'); loadPositions();
 }
-function clearPosForm() {
-  ['pos-id','pos-name','pos-desc','pos-material'].forEach(f => document.getElementById(f).value = '');
-  document.getElementById('pos-count').value = 1;
-  document.getElementById('pos-modal-title').textContent = 'Nouveau poste';
+function clearPosForm(){
+  ['pos-id','pos-name','pos-desc','pos-material'].forEach(f=>sv(f,''));
+  sv('pos-count',1); sv('pos-type','Ravitaillement');
+  document.getElementById('pos-modal-title').textContent='Nouveau poste';
+  document.getElementById('slots-container').innerHTML=''; slotRows=[];
 }
 
-// ─── VOLUNTEERS ───────────────────────────────────────────────
-async function loadVolunteers() {
+// ─── VOLUNTEERS MGMT ──────────────────────────────────────────
+async function loadVolsMgmt() {
   if (!currentEvent) return;
-  document.getElementById('vol-event-name').textContent = currentEvent.name;
+  document.getElementById('vol-event-name').textContent=currentEvent.name;
   try {
-    allVolunteers = await sbGet('volunteers', `event_id=eq.${currentEvent.id}&order=full_name.asc`);
-    renderVolunteers(allVolunteers);
-  } catch(e) { showError('volunteers-list', e); }
+    allVols = await get('volunteers',`event_id=eq.${currentEvent.id}&order=full_name.asc`);
+    renderVols(allVols);
+  } catch(e){ errEl('volunteers-list',e); }
 }
-
-function renderVolunteers(vols) {
+function renderVols(vols) {
   const el = document.getElementById('volunteers-list');
-  if (!vols.length) {
-    el.innerHTML = `<div class="empty-state"><div class="icon">👥</div><p>Aucun bénévole ajouté.</p></div>`; return;
-  }
-  el.innerHTML = `<div class="table-wrap"><table>
+  if (!vols.length) { el.innerHTML=emptyState('👥','Aucun bénévole'); return; }
+  el.innerHTML=`<div class="table-wrap"><table>
     <thead><tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Notes</th><th>Actions</th></tr></thead>
-    <tbody>${vols.map(v => `
-      <tr>
-        <td><b>${esc(v.full_name)}</b></td>
-        <td>${esc(v.email || '—')}</td>
-        <td>${esc(v.phone || '—')}</td>
-        <td><small style="color:var(--muted)">${esc(v.notes || '—')}</small></td>
-        <td><div class="td-actions">
-          <button class="btn btn-ghost" style="font-size:12px; padding:6px 10px;" onclick="editVolunteer('${v.id}')">✏️</button>
-          <button class="btn btn-danger" style="font-size:12px; padding:6px 10px;" onclick="deleteVolunteer('${v.id}')">🗑️</button>
-        </div></td>
-      </tr>`).join('')}
+    <tbody>${vols.map(v=>`<tr>
+      <td><b>${esc(v.full_name)}</b></td><td>${esc(v.email||'—')}</td><td>${esc(v.phone||'—')}</td>
+      <td><small style="color:var(--muted)">${esc(v.notes||'—')}</small></td>
+      <td><div class="td-actions">
+        <button class="btn btn-ghost" style="font-size:12px;padding:5px 9px" onclick="editVol('${v.id}')">✏️</button>
+        <button class="btn btn-danger" style="font-size:12px;padding:5px 9px" onclick="deleteVol('${v.id}')">🗑️</button>
+      </div></td>
+    </tr>`).join('')}
     </tbody></table></div>`;
 }
-
-function filterVolunteers() {
+function filterVols() {
   const q = document.getElementById('vol-search').value.toLowerCase();
-  renderVolunteers(allVolunteers.filter(v =>
-    (v.full_name || '').toLowerCase().includes(q) ||
-    (v.email || '').toLowerCase().includes(q) ||
-    (v.phone || '').includes(q) ||
-    (v.notes || '').toLowerCase().includes(q)
-  ));
+  renderVols(allVols.filter(v=>[v.full_name,v.email,v.phone,v.notes].some(s=>(s||'').toLowerCase().includes(q))));
 }
-
 async function saveVolunteer() {
   if (!currentEvent) return;
-  const id = document.getElementById('vol-id').value;
-  const data = {
-    event_id: currentEvent.id,
-    full_name: document.getElementById('vol-name').value.trim(),
-    email: document.getElementById('vol-email').value.trim() || null,
-    phone: document.getElementById('vol-phone').value.trim() || null,
-    notes: document.getElementById('vol-notes').value.trim() || null,
-  };
-  if (!data.full_name) return toast('Le nom est obligatoire', 'error');
+  const id=v('vol-id');
+  const data={event_id:currentEvent.id,full_name:v('vol-name'),email:v('vol-email')||null,phone:v('vol-phone')||null,notes:v('vol-notes')||null};
+  if (!data.full_name) return toast('Nom obligatoire','error');
   try {
-    if (id) { await sbPatch('volunteers', `id=eq.${id}`, data); }
-    else { await sbPost('volunteers', data); }
-    closeModal('modal-volunteer');
-    clearVolForm();
-    toast('Bénévole enregistré !', 'success');
-    loadVolunteers();
-  } catch(e) { toast('Erreur : ' + e.message, 'error'); }
+    if(id) await patch('volunteers',`id=eq.${id}`,data); else await post('volunteers',data);
+    closeModal('modal-add-vol'); clearVolForm(); toast('Bénévole enregistré !','success'); loadVolsMgmt();
+  } catch(e){ toast('Erreur : '+e.message,'error'); }
 }
-
-async function editVolunteer(id) {
-  const [v] = await sbGet('volunteers', `id=eq.${id}`);
-  document.getElementById('vol-id').value = v.id;
-  document.getElementById('vol-name').value = v.full_name;
-  document.getElementById('vol-email').value = v.email || '';
-  document.getElementById('vol-phone').value = v.phone || '';
-  document.getElementById('vol-notes').value = v.notes || '';
-  document.getElementById('vol-modal-title').textContent = 'Modifier le bénévole';
-  openModal('modal-volunteer');
+async function editVol(id) {
+  const [v2]=await get('volunteers',`id=eq.${id}`);
+  sv('vol-id',v2.id);sv('vol-name',v2.full_name);sv('vol-email',v2.email||'');sv('vol-phone',v2.phone||'');sv('vol-notes',v2.notes||'');
+  document.getElementById('vol-modal-title').textContent='Modifier le bénévole'; openModal('modal-add-vol');
 }
-
-async function deleteVolunteer(id) {
+async function deleteVol(id) {
   if (!confirm('Supprimer ce bénévole ?')) return;
-  await sbDelete('volunteers', `id=eq.${id}`);
-  toast('Bénévole supprimé', 'info');
-  loadVolunteers();
+  await del('volunteers',`id=eq.${id}`); toast('Supprimé','info'); loadVolsMgmt();
 }
-function clearVolForm() {
-  ['vol-id','vol-name','vol-email','vol-phone','vol-notes'].forEach(f => document.getElementById(f).value = '');
-  document.getElementById('vol-modal-title').textContent = 'Ajouter un bénévole';
-}
+function clearVolForm(){['vol-id','vol-name','vol-email','vol-phone','vol-notes'].forEach(f=>sv(f,''));document.getElementById('vol-modal-title').textContent='Ajouter un bénévole';}
 
-// ─── CSV IMPORT ───────────────────────────────────────────────
-let csvData = [];
-document.getElementById('csv-file').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const lines = ev.target.result.split('\n').filter(l => l.trim());
-    csvData = [];
-    const startIdx = lines[0].toLowerCase().includes('nom') || lines[0].toLowerCase().includes('name') ? 1 : 0;
-    for (let i = startIdx; i < lines.length; i++) {
-      const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
-      if (!cols[0]) continue;
-      csvData.push({ full_name: cols[0], email: cols[1] || null, phone: cols[2] || null, notes: cols[3] || null });
+// CSV
+let csvImportData=[];
+document.getElementById('csv-file').addEventListener('change',e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const lines=ev.target.result.split('\n').filter(l=>l.trim());
+    csvImportData=[];
+    const start=lines[0].toLowerCase().includes('nom')||lines[0].toLowerCase().includes('name')?1:0;
+    for(let i=start;i<lines.length;i++){
+      const cols=lines[i].split(',').map(c=>c.trim().replace(/^"|"$/g,''));
+      if(!cols[0]) continue;
+      csvImportData.push({full_name:cols[0],email:cols[1]||null,phone:cols[2]||null,notes:cols[3]||null});
     }
-    document.getElementById('csv-count').textContent = `${csvData.length} bénévoles détectés`;
-    document.getElementById('csv-table').innerHTML = `<table>
-      <tr><th>Nom</th><th>Email</th><th>Téléphone</th><th>Notes</th></tr>
-      ${csvData.slice(0,5).map(r => `<tr><td>${esc(r.full_name)}</td><td>${esc(r.email||'')}</td><td>${esc(r.phone||'')}</td><td>${esc(r.notes||'')}</td></tr>`).join('')}
-      ${csvData.length > 5 ? `<tr><td colspan="4" style="color:var(--muted); text-align:center;">... et ${csvData.length-5} autres</td></tr>` : ''}
-    </table>`;
-    document.getElementById('csv-preview').style.display = 'block';
-    document.getElementById('import-btn').disabled = false;
+    document.getElementById('csv-count').textContent=`${csvImportData.length} bénévoles détectés`;
+    document.getElementById('csv-preview').style.display='block';
+    document.getElementById('import-btn').disabled=false;
   };
   reader.readAsText(file);
 });
-
 async function importCSV() {
-  if (!currentEvent || !csvData.length) return;
-  const rows = csvData.map(r => ({ ...r, event_id: currentEvent.id }));
+  if (!currentEvent||!csvImportData.length) return;
   try {
-    await sbPost('volunteers', rows);
-    closeModal('modal-import');
-    toast(`${rows.length} bénévoles importés !`, 'success');
-    loadVolunteers();
-    csvData = [];
-    document.getElementById('csv-preview').style.display = 'none';
-    document.getElementById('csv-file').value = '';
-    document.getElementById('import-btn').disabled = true;
-  } catch(e) { toast('Erreur import : ' + e.message, 'error'); }
+    await post('volunteers',csvImportData.map(r=>({...r,event_id:currentEvent.id})));
+    closeModal('modal-import'); toast(`${csvImportData.length} bénévoles importés !`,'success'); loadVolsMgmt();
+    csvImportData=[]; document.getElementById('csv-preview').style.display='none';
+    document.getElementById('csv-file').value=''; document.getElementById('import-btn').disabled=true;
+  } catch(e){ toast('Erreur import : '+e.message,'error'); }
 }
 
 // ─── ASSIGNMENTS ──────────────────────────────────────────────
 async function loadAssignments() {
   if (!currentEvent) return;
-  document.getElementById('asgn-event-name').textContent = currentEvent.name;
+  document.getElementById('asgn-event-name').textContent=currentEvent.name;
   try {
-    const [positions, volunteers, assignments] = await Promise.all([
-      sbGet('positions', `event_id=eq.${currentEvent.id}&order=name.asc`),
-      sbGet('volunteers', `event_id=eq.${currentEvent.id}&order=full_name.asc`),
-      sbGet('assignments', `event_id=eq.${currentEvent.id}`),
+    const [positions,volunteers,assignments,slots] = await Promise.all([
+      get('positions',`event_id=eq.${currentEvent.id}&order=name.asc`),
+      get('volunteers',`event_id=eq.${currentEvent.id}&order=full_name.asc`),
+      get('assignments',`event_id=eq.${currentEvent.id}`),
+      get('position_slots',`event_id=eq.${currentEvent.id}`)
     ]);
-
-    // Stats
-    const totalSlots = positions.reduce((s, p) => s + (p.required_count || 1), 0);
-    const filled = assignments.length;
-    const pct = totalSlots > 0 ? Math.round(filled / totalSlots * 100) : 0;
-    document.getElementById('asgn-stats').innerHTML = `
+    allPos=positions; allVols=volunteers; allSlots=slots;
+    const totalSlots=positions.reduce((s,p)=>s+(p.required_count||1),0);
+    const pct=totalSlots>0?Math.round(assignments.length/totalSlots*100):0;
+    document.getElementById('asgn-stats').innerHTML=`
       <div class="stat-card"><div class="stat-value">${positions.length}</div><div class="stat-label">Postes</div></div>
       <div class="stat-card"><div class="stat-value">${volunteers.length}</div><div class="stat-label">Bénévoles</div></div>
-      <div class="stat-card"><div class="stat-value">${filled}/${totalSlots}</div><div class="stat-label">Places pourvues</div></div>
-      <div class="stat-card">
-        <div class="stat-value" style="color:${pct>=100?'var(--green)':'var(--primary)'}">${pct}%</div>
-        <div class="stat-label">Taux de couverture</div>
+      <div class="stat-card"><div class="stat-value">${assignments.length}/${totalSlots}</div><div class="stat-label">Affectations</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:${pct>=100?'var(--green)':'var(--primary)'}">${pct}%</div><div class="stat-label">Couverture</div></div>`;
+    // Populate selects
+    const vs=document.getElementById('asgn-vol-id'), ps=document.getElementById('asgn-pos-id');
+    vs.innerHTML='<option value="">— Choisir —</option>'+volunteers.map(v=>`<option value="${v.id}">${esc(v.full_name)}</option>`).join('');
+    ps.innerHTML='<option value="">— Choisir —</option>'+positions.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+    const vm=Object.fromEntries(volunteers.map(v=>[v.id,v]));
+    const pm=Object.fromEntries(positions.map(p=>[p.id,p]));
+    const sm=Object.fromEntries(slots.map(s=>[s.id,s]));
+    const byPos={};
+    positions.forEach(p=>byPos[p.id]=[]);
+    assignments.forEach(a=>{if(byPos[a.position_id]) byPos[a.position_id].push(a);});
+    const el=document.getElementById('assignments-list');
+    if (!positions.length) { el.innerHTML=emptyState('🔗','Créez d\'abord des postes et bénévoles'); return; }
+    el.innerHTML=positions.map(p=>{
+      const asgns=byPos[p.id]||[];
+      const pct2=Math.min(100,Math.round(asgns.length/(p.required_count||1)*100));
+      return `<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+          <div><b style="font-size:15px">${esc(p.name)}</b> <span class="badge badge-draft">${esc(p.type||'')}</span>
+          <span style="font-size:13px;color:var(--muted);margin-left:8px">${asgns.length}/${p.required_count||1}</span></div>
+        </div>
+        <div class="progress-bar" style="margin-bottom:10px"><div class="progress-fill ${pct2>=100?'full':''}" style="width:${pct2}%"></div></div>
+        ${asgns.length?`<div style="display:flex;flex-wrap:wrap;gap:8px">${asgns.map(a=>{
+          const vol=vm[a.volunteer_id]; if(!vol) return '';
+          const slot=a.slot_id&&sm[a.slot_id]?`<span style="font-size:11px;color:var(--muted)"> · ⏰${esc(sm[a.slot_id].label||sm[a.slot_id].start_time||'')}</span>`:'';
+          return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;display:flex;align-items:center;gap:8px">
+            <span>👤 <b>${esc(vol.full_name)}</b>${slot}</span>
+            <button class="btn btn-green" style="font-size:11px;padding:4px 8px" onclick="generateLink('${a.id}','${esc(vol.full_name)}','${vol.email||''}','${vol.phone||''}','${esc(p.name)}','${a.slot_id||''}')">📨</button>
+            <button class="btn btn-blue" style="font-size:11px;padding:4px 8px" onclick="showFiche('${a.id}','${esc(vol.full_name)}','${esc(p.name)}','${esc(p.description||'')}','${esc(p.material||'')}','${a.slot_id||''}')">📄</button>
+            <button class="btn btn-danger" style="font-size:11px;padding:4px 8px" onclick="deleteAsgn('${a.id}')">✕</button>
+          </div>`;
+        }).join('')}</div>`:'<div style="color:var(--muted);font-size:13px">Aucun bénévole affecté</div>'}
       </div>`;
-
-    // Populate assignment modal selects
-    const vs = document.getElementById('asgn-vol-id');
-    const ps = document.getElementById('asgn-pos-id');
-    vs.innerHTML = '<option value="">-- Choisir un bénévole --</option>' + volunteers.map(v => `<option value="${v.id}">${esc(v.full_name)}</option>`).join('');
-    ps.innerHTML = '<option value="">-- Choisir un poste --</option>' + positions.map(p => `<option value="${p.id}">${esc(p.name)} (${p.required_count||1} requis)</option>`).join('');
-
-    // Build lookup maps
-    const volMap = Object.fromEntries(volunteers.map(v => [v.id, v]));
-    const posMap = Object.fromEntries(positions.map(p => [p.id, p]));
-
-    // Group by position
-    const el = document.getElementById('assignments-list');
-    if (!positions.length) { el.innerHTML = `<div class="empty-state"><div class="icon">🔗</div><p>Créez d'abord des postes et des bénévoles.</p></div>`; return; }
-
-    const byPos = {};
-    positions.forEach(p => byPos[p.id] = []);
-    assignments.forEach(a => { if(byPos[a.position_id]) byPos[a.position_id].push(a); });
-
-    el.innerHTML = positions.map(p => {
-      const asgns = byPos[p.id] || [];
-      const pct = Math.min(100, Math.round(asgns.length / (p.required_count || 1) * 100));
-      return `
-        <div style="margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid var(--border);">
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
-            <div>
-              <b>${esc(p.name)}</b>
-              <span class="badge badge-draft" style="margin-left:8px;">${esc(p.type||'')}</span>
-              <span style="color:var(--muted); font-size:13px; margin-left:8px;">${asgns.length}/${p.required_count||1} bénévoles</span>
-            </div>
-          </div>
-          <div class="progress-bar" style="margin-bottom:8px;"><div class="progress-fill ${pct>=100?'full':''}" style="width:${pct}%"></div></div>
-          ${asgns.length ? `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
-            ${asgns.map(a => {
-              const v = volMap[a.volunteer_id];
-              if (!v) return '';
-              return `<div style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:8px 12px; display:flex; align-items:center; gap:8px; font-size:13px;">
-                <span>👤 <b>${esc(v.full_name)}</b></span>
-                <button class="btn btn-green" style="font-size:11px; padding:4px 8px;" onclick="generateLink('${a.id}', '${esc(v.full_name)}', '${v.email||''}', '${v.phone||''}', '${esc(p.name)}')">📨 Lien</button>
-                <button class="btn btn-danger" style="font-size:11px; padding:4px 8px;" onclick="deleteAssignment('${a.id}')">✕</button>
-              </div>`;
-            }).join('')}
-          </div>` : '<div style="color:var(--muted); font-size:13px;">Aucun bénévole affecté</div>'}
-        </div>`;
     }).join('');
+  } catch(e){ errEl('assignments-list',e); }
+}
 
-  } catch(e) { showError('assignments-list', e); }
+async function loadSlotOptions() {
+  const posId=document.getElementById('asgn-pos-id').value;
+  const sf=document.getElementById('slot-field');
+  const ss=document.getElementById('asgn-slot-id');
+  if (!posId||!currentEvent) { sf.style.display='none'; return; }
+  const slots=await get('position_slots',`position_id=eq.${posId}`);
+  if (!slots.length) { sf.style.display='none'; return; }
+  sf.style.display='block';
+  ss.innerHTML='<option value="">— Pas de créneau —</option>'+slots.map(s=>`<option value="${s.id}">${esc(s.label||'')} ${s.start_time?s.start_time.substring(0,5):''} ${s.end_time?'→ '+s.end_time.substring(0,5):''}</option>`).join('');
 }
 
 async function saveAssignment() {
-  const volId = document.getElementById('asgn-vol-id').value;
-  const posId = document.getElementById('asgn-pos-id').value;
-  if (!volId || !posId) return toast('Choisissez un bénévole et un poste', 'error');
+  const volId=v('asgn-vol-id'), posId=v('asgn-pos-id');
+  if (!volId||!posId) return toast('Choisissez bénévole et poste','error');
   try {
-    await sbPost('assignments', { event_id: currentEvent.id, volunteer_id: volId, position_id: posId });
-    closeModal('modal-assignment');
-    toast('Affectation créée !', 'success');
-    loadAssignments();
-  } catch(e) { toast('Erreur : ' + e.message, 'error'); }
+    await post('assignments',{event_id:currentEvent.id,volunteer_id:volId,position_id:posId,slot_id:v('asgn-slot-id')||null,notes:v('asgn-notes')||null});
+    closeModal('modal-assignment'); toast('Affectation créée !','success'); loadAssignments();
+  } catch(e){ toast('Erreur : '+e.message,'error'); }
 }
 
-async function deleteAssignment(id) {
+async function deleteAsgn(id) {
   if (!confirm('Supprimer cette affectation ?')) return;
-  // Delete related token/confirmation
-  const tokens = await sbGet('invite_tokens', `assignment_id=eq.${id}`);
-  for (const t of tokens) { await sbDelete('confirmations', `token=eq.${t.token}`); }
-  await sbDelete('invite_tokens', `assignment_id=eq.${id}`);
-  await sbDelete('assignments', `id=eq.${id}`);
-  toast('Affectation supprimée', 'info');
-  loadAssignments();
+  const tokens=await get('invite_tokens',`assignment_id=eq.${id}`);
+  for(const t of tokens){ await del('confirmations',`token=eq.${t.token}`); }
+  await del('invite_tokens',`assignment_id=eq.${id}`);
+  await del('assignments',`id=eq.${id}`);
+  toast('Supprimé','info'); loadAssignments();
 }
 
-// ─── GENERATE LINK ────────────────────────────────────────────
-async function generateLink(assignmentId, volName, volEmail, volPhone, posName) {
-  // Check if token already exists
-  let tokens = await sbGet('invite_tokens', `assignment_id=eq.${assignmentId}`);
+// ─── LINKS & FICHE ────────────────────────────────────────────
+async function generateLink(asgnId,volName,volEmail,volPhone,posName,slotId) {
+  let rows=await get('invite_tokens',`assignment_id=eq.${asgnId}`);
   let token;
-  if (tokens.length) {
-    token = tokens[0].token;
-  } else {
-    token = generateUUID();
-    await sbPost('invite_tokens', {
-      token,
-      event_id: currentEvent.id,
-      assignment_id: assignmentId,
-    });
+  if(rows.length) token=rows[0].token;
+  else {
+    const r=await post('invite_tokens',{token:uuid(),event_id:currentEvent.id,assignment_id:asgnId});
+    token=r[0]?.token||r.token;
   }
-
-  const baseUrl = window.location.href.replace('index.html', '').replace(/\?.*/, '').replace(/#.*/, '');
-  const link = `${baseUrl}benevole.html?token=${token}`;
-
-  currentLinkData = { link, volName, volEmail, volPhone, posName, token };
-  document.getElementById('link-volunteer-info').textContent = `👤 ${volName} — ${posName}`;
-  document.getElementById('link-url').textContent = link;
+  const base=window.location.href.replace('index.html','').replace(/[?#].*/,'');
+  const link=`${base}portail.html?token=${token}`;
+  currentLinkData={link,volName,volEmail,volPhone,posName,token};
+  document.getElementById('link-info').textContent=`👤 ${volName} — ${posName}`;
+  document.getElementById('link-url').textContent=link;
   openModal('modal-link');
 }
 
-function generateUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = Math.random() * 16 | 0;
-    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+function uuid(){return'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16)})}
+function copyLink(){navigator.clipboard.writeText(currentLinkData.link).then(()=>toast('Copié !','success'))}
+function openWA(){const m=encodeURIComponent(`Bonjour ${currentLinkData.volName} 👋\n\nVotre mission : ${currentLinkData.posName}\n\nVoir et confirmer : ${currentLinkData.link}`);window.open(`https://wa.me/?text=${m}`,'_blank')}
+function openEmail(){const s=encodeURIComponent(`Votre mission — ${currentEvent.name}`);const b=encodeURIComponent(`Bonjour ${currentLinkData.volName},\n\nPoste : ${currentLinkData.posName}\n\nConfirmez ici : ${currentLinkData.link}`);window.open(`mailto:${currentLinkData.volEmail}?subject=${s}&body=${b}`,'_blank')}
+
+function showFiche(asgnId, volName, posName, posDesc, posMat, slotId) {
+  const slot = slotId && allSlots.find(s=>s.id===slotId);
+  const slotStr = slot ? `${slot.label||''} ${slot.start_time?slot.start_time.substring(0,5):''} ${slot.end_time?'→ '+slot.end_time.substring(0,5):''}` : '';
+  const w = window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Fiche poste</title>
+  <style>body{font-family:Arial,sans-serif;max-width:600px;margin:40px auto;padding:20px;color:#111}
+  h1{font-size:24px;border-bottom:3px solid #F97316;padding-bottom:10px;color:#F97316}
+  h2{font-size:18px;margin-top:24px;color:#333}.label{font-weight:bold;color:#555;font-size:12px;text-transform:uppercase;margin-top:16px}.val{font-size:15px;margin-top:4px}
+  .slot{background:#FEF3E2;border:1px solid #FED7AA;border-radius:8px;padding:12px;margin:16px 0;font-size:16px;font-weight:bold}
+  @media print{button{display:none}}</style></head><body>
+  <h1>⚡ EventOps Outdoor — Fiche de poste</h1>
+  <div class="label">Événement</div><div class="val">${esc(currentEvent.name)}</div>
+  <div class="label">Bénévole</div><div class="val">${esc(volName)}</div>
+  <div class="label">Poste assigné</div><div class="val" style="font-size:20px;font-weight:bold;color:#F97316">${esc(posName)}</div>
+  ${slotStr?`<div class="slot">⏰ Créneau : ${esc(slotStr)}</div>`:''}
+  ${currentEvent.location?`<div class="label">Lieu</div><div class="val">📍 ${esc(currentEvent.location)}</div>`:''}
+  ${currentEvent.start_date?`<div class="label">Date</div><div class="val">📅 ${new Date(currentEvent.start_date).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>`:''}
+  ${posDesc?`<div class="label">Instructions</div><div class="val">${esc(posDesc)}</div>`:''}
+  ${posMat?`<div class="label">Matériel à prévoir</div><div class="val">🎒 ${esc(posMat)}</div>`:''}
+  ${currentEvent.contact_phone?`<div class="label">Contact organisateur</div><div class="val">📞 ${esc(currentEvent.contact_phone)}</div>`:''}
+  <br><button onclick="window.print()" style="background:#F97316;color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-size:15px">🖨️ Imprimer</button>
+  </body></html>`);
+  w.document.close();
+}
+function printFiche(){ toast('Utilisez le bouton 📄 sur l\'affectation','info'); }
+
+// ─── REQUESTS ─────────────────────────────────────────────────
+let allReqs=[], reqFilter='pending';
+async function loadRequests() {
+  if (!currentEvent) return;
+  document.getElementById('req-event-name').textContent=currentEvent.name;
+  try {
+    allReqs=await get('volunteer_requests',`event_id=eq.${currentEvent.id}&order=created_at.desc`);
+    const pending=allReqs.filter(r=>r.status==='pending').length;
+    if(pending>0){document.getElementById('requests-badge').textContent=pending;document.getElementById('requests-badge').style.display='inline';}
+    filterRequests(reqFilter);
+  } catch(e){ errEl('requests-list',e); }
+}
+async function filterRequests(status) {
+  reqFilter=status;
+  ['pending','accepted','declined'].forEach(s=>{
+    document.getElementById('tab-'+s).classList.toggle('active',s===status);
   });
+  const filtered=allReqs.filter(r=>r.status===status);
+  if (!filtered.length) { document.getElementById('requests-list').innerHTML=emptyState('📬','Aucune demande dans cette catégorie'); return; }
+  const vids=[...new Set(filtered.map(r=>r.volunteer_id))];
+  const vols=await get('profiles',`id=in.(${vids.join(',')})&select=id,full_name,email,phone,skills`);
+  const vm=Object.fromEntries(vols.map(v=>[v.id,v]));
+  document.getElementById('requests-list').innerHTML=filtered.map(r=>{
+    const vol=vm[r.volunteer_id]||{};
+    return `<div class="request-card">
+      <div class="request-header">
+        <div class="request-name">👤 ${esc(vol.full_name||'Inconnu')}</div>
+        <span class="badge badge-${status}">${{pending:'⏳ En attente',accepted:'✅ Acceptée',declined:'❌ Refusée'}[status]}</span>
+      </div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:6px">${esc(vol.email||'')} ${vol.phone?'· '+esc(vol.phone):''}</div>
+      ${vol.skills?`<div style="font-size:13px;margin-bottom:6px">🛠️ ${esc(vol.skills)}</div>`:''}
+      ${r.message?`<div class="request-msg">"${esc(r.message)}"</div>`:''}
+      ${r.response_note?`<div style="font-size:13px;color:var(--muted);font-style:italic">Réponse : ${esc(r.response_note)}</div>`:''}
+      ${status==='pending'?`<div class="request-actions">
+        <button class="btn btn-green" style="font-size:13px" onclick="openRespondModal('${r.id}','${esc(vol.full_name||'')}')">✅ Accepter / Affecter</button>
+        <button class="btn btn-danger" style="font-size:13px" onclick="quickDecline('${r.id}')">❌ Refuser</button>
+      </div>`:''}
+    </div>`;
+  }).join('');
 }
 
-function copyLink() {
-  navigator.clipboard.writeText(currentLinkData.link).then(() => toast('Lien copié !', 'success'));
+async function openRespondModal(reqId, volName) {
+  sv('respond-id',reqId);
+  document.getElementById('respond-title').textContent=`Répondre — ${volName}`;
+  document.getElementById('respond-info').innerHTML=`<div style="font-size:14px;color:var(--muted)">Affectez un poste à ce bénévole et envoyez-lui une réponse personnalisée.</div>`;
+  const ps=document.getElementById('respond-pos'), rs=document.getElementById('respond-slot');
+  ps.innerHTML='<option value="">— Choisir un poste —</option>'+(allPos.length?allPos:await get('positions',`event_id=eq.${currentEvent.id}`)).map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  rs.innerHTML='<option value="">— Pas de créneau —</option>';
+  openModal('modal-respond');
 }
-function openWhatsApp() {
-  const msg = encodeURIComponent(`Bonjour ${currentLinkData.volName} 👋\n\nVoici votre mission pour ${currentEvent.name} :\n📍 Poste : ${currentLinkData.posName}\n\nCliquez ici pour voir votre mission et confirmer votre présence :\n${currentLinkData.link}`);
-  const phone = (currentLinkData.volPhone || '').replace(/\s/g, '');
-  window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+
+document.getElementById('respond-pos').addEventListener('change', async function() {
+  const posId=this.value;
+  const rs=document.getElementById('respond-slot');
+  if (!posId) { rs.innerHTML='<option value="">— Pas de créneau —</option>'; return; }
+  const slots=await get('position_slots',`position_id=eq.${posId}`);
+  rs.innerHTML='<option value="">— Pas de créneau —</option>'+slots.map(s=>`<option value="${s.id}">${esc(s.label||'')} ${s.start_time?s.start_time.substring(0,5):''}</option>`).join('');
+});
+
+async function respondRequest(status) {
+  const reqId=v('respond-id');
+  const posId=v('respond-pos'), slotId=v('respond-slot'), note=v('respond-note');
+  try {
+    await patch('volunteer_requests',`id=eq.${reqId}`,{status,response_note:note||null,position_id:posId||null,slot_id:slotId||null,updated_at:new Date().toISOString()});
+    // If accepted, create assignment and volunteer record
+    if (status==='accepted' && posId) {
+      const [req]=await get('volunteer_requests',`id=eq.${reqId}`);
+      const vol=await get('profiles',`id=eq.${req.volunteer_id}&select=id,full_name,email,phone`);
+      if (vol[0]) {
+        // Check if volunteer already exists in volunteers table
+        let volRow=await get('volunteers',`event_id=eq.${currentEvent.id}&email=eq.${vol[0].email}`);
+        let volId;
+        if (!volRow.length) {
+          const nv=await post('volunteers',{event_id:currentEvent.id,full_name:vol[0].full_name,email:vol[0].email,phone:vol[0].phone||null});
+          volId=nv[0]?.id||nv.id;
+        } else { volId=volRow[0].id; }
+        try { await post('assignments',{event_id:currentEvent.id,volunteer_id:volId,position_id:posId,slot_id:slotId||null}); } catch(e){}
+        // Create notification
+        await post('notifications',{user_id:req.volunteer_id,event_id:currentEvent.id,type:'request_accepted',email_to:vol[0].email,subject:`✅ Votre demande pour ${currentEvent.name} a été acceptée`,body:`Bonjour ${vol[0].full_name},\n\nVotre demande de participation à ${currentEvent.name} a été acceptée.\n${note?'Message de l\'organisateur : '+note:''}`});
+      }
+    }
+    closeModal('modal-respond'); toast(status==='accepted'?'Demande acceptée !':'Demande refusée','success');
+    loadRequests();
+  } catch(e){ toast('Erreur : '+e.message,'error'); }
 }
-function openEmail() {
-  const sub = encodeURIComponent(`Votre mission — ${currentEvent.name}`);
-  const body = encodeURIComponent(`Bonjour ${currentLinkData.volName},\n\nMerci de participer à l'organisation de ${currentEvent.name} !\n\nPoste assigné : ${currentLinkData.posName}\n\nConsultez votre mission et confirmez votre présence via ce lien :\n${currentLinkData.link}\n\nÀ bientôt !`);
-  window.open(`mailto:${currentLinkData.volEmail}?subject=${sub}&body=${body}`, '_blank');
+
+async function quickAccept(reqId) {
+  const [req]=await get('volunteer_requests',`id=eq.${reqId}`);
+  await patch('volunteer_requests',`id=eq.${reqId}`,{status:'accepted',updated_at:new Date().toISOString()});
+  toast('Acceptée','success'); loadDashboard();
+}
+async function quickDecline(reqId) {
+  await patch('volunteer_requests',`id=eq.${reqId}`,{status:'declined',updated_at:new Date().toISOString()});
+  toast('Refusée','info'); loadDashboard(); if(allReqs.length) loadRequests();
 }
 
 // ─── CONFIRMATIONS ────────────────────────────────────────────
 async function loadConfirmations() {
   if (!currentEvent) return;
-  document.getElementById('conf-event-name').textContent = currentEvent.name;
+  document.getElementById('conf-event-name').textContent=currentEvent.name;
   try {
-    const [tokens, confirmations, assignments, volunteers, positions] = await Promise.all([
-      sbGet('invite_tokens', `event_id=eq.${currentEvent.id}`),
-      sbGet('confirmations', 'order=responded_at.desc'),
-      sbGet('assignments', `event_id=eq.${currentEvent.id}`),
-      sbGet('volunteers', `event_id=eq.${currentEvent.id}`),
-      sbGet('positions', `event_id=eq.${currentEvent.id}`),
+    const [tokens,confirmations,assignments,volunteers,positions] = await Promise.all([
+      get('invite_tokens',`event_id=eq.${currentEvent.id}`),
+      get('confirmations','order=responded_at.desc'),
+      get('assignments',`event_id=eq.${currentEvent.id}`),
+      get('volunteers',`event_id=eq.${currentEvent.id}`),
+      get('positions',`event_id=eq.${currentEvent.id}`)
     ]);
-
-    const volMap = Object.fromEntries(volunteers.map(v => [v.id, v]));
-    const posMap = Object.fromEntries(positions.map(p => [p.id, p]));
-    const asgnMap = Object.fromEntries(assignments.map(a => [a.id, a]));
-    const confMap = Object.fromEntries(confirmations.map(c => [c.token, c]));
-
-    const yes = confirmations.filter(c => c.response === 'confirmed').length;
-    const no = confirmations.filter(c => c.response === 'declined').length;
-    const pending = tokens.length - confirmations.length;
-
-    document.getElementById('conf-stats').innerHTML = `
+    const vm=Object.fromEntries(volunteers.map(v=>[v.id,v]));
+    const pm=Object.fromEntries(positions.map(p=>[p.id,p]));
+    const am=Object.fromEntries(assignments.map(a=>[a.id,a]));
+    const cm=Object.fromEntries(confirmations.map(c=>[c.token,c]));
+    const yes=confirmations.filter(c=>c.response==='confirmed').length;
+    const no=confirmations.filter(c=>c.response==='declined').length;
+    document.getElementById('conf-stats').innerHTML=`
       <div class="stat-card"><div class="stat-value">${tokens.length}</div><div class="stat-label">Liens envoyés</div></div>
-      <div class="stat-card"><div class="stat-value confirm-yes">${yes}</div><div class="stat-label">✅ Confirmés</div></div>
-      <div class="stat-card"><div class="stat-value confirm-no">${no}</div><div class="stat-label">❌ Déclinés</div></div>
-      <div class="stat-card"><div class="stat-value confirm-pending">${pending}</div><div class="stat-label">⏳ En attente</div></div>`;
+      <div class="stat-card"><div class="stat-value" style="color:var(--green)">${yes}</div><div class="stat-label">✅ Confirmés</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--red)">${no}</div><div class="stat-label">❌ Déclinés</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--muted)">${tokens.length-confirmations.length}</div><div class="stat-label">⏳ En attente</div></div>`;
+    document.getElementById('confirmations-list').innerHTML=tokens.length?`<div class="table-wrap"><table>
+      <thead><tr><th>Bénévole</th><th>Poste</th><th>Contact</th><th>Statut</th><th>Date</th></tr></thead>
+      <tbody>${tokens.map(t=>{
+        const a=am[t.assignment_id],vol=a?vm[a.volunteer_id]:null,pos=a?pm[a.position_id]:null,conf=cm[t.token];
+        const status=conf?(conf.response==='confirmed'?'<span class="badge badge-accepted">✅ Confirmé</span>':'<span class="badge badge-declined">❌ Décliné</span>'):'<span class="badge badge-pending">⏳ Attente</span>';
+        return `<tr><td><b>${esc(vol?.full_name||'—')}</b></td><td>${esc(pos?.name||'—')}</td>
+          <td style="font-size:12px;color:var(--muted)">${vol?.email?'📧 '+esc(vol.email):''}${vol?.phone?'<br>📱 '+esc(vol.phone):''}</td>
+          <td>${status}</td><td style="font-size:12px;color:var(--muted)">${conf?.responded_at?new Date(conf.responded_at).toLocaleDateString('fr-FR'):'—'}</td></tr>`;
+      }).join('')}</tbody></table></div>`:emptyState('📨','Aucun lien généré encore');
+  } catch(e){ errEl('confirmations-list',e); }
+}
 
-    const el = document.getElementById('confirmations-list');
-    if (!tokens.length) { el.innerHTML = `<div class="empty-state"><div class="icon">📨</div><p>Aucun lien généré. Allez dans Affectations et envoyez les liens.</p></div>`; return; }
+// ─── BALISAGE ─────────────────────────────────────────────────
+async function loadBalisage() {
+  if (!currentEvent) return;
+  document.getElementById('bal-event-name').textContent=currentEvent.name;
+  try {
+    const positions=await get('positions',`event_id=eq.${currentEvent.id}&type=eq.Balisage`);
+    if (!positions.length) {
+      document.getElementById('balisage-list').innerHTML=emptyState('🚩','Aucun poste de type "Balisage" trouvé','<small>Créez des postes de type Balisage pour activer ce suivi</small>'); return;
+    }
+    const assignments=await get('assignments',`event_id=eq.${currentEvent.id}`);
+    const pm=Object.fromEntries(positions.map(p=>[p.id,p]));
+    const balAsgns=assignments.filter(a=>pm[a.position_id]);
+    const bstats=await get('balisage_status',`event_id=eq.${currentEvent.id}`);
+    const bm=Object.fromEntries(bstats.map(b=>[b.assignment_id,b]));
+    const vols=await get('volunteers',`event_id=eq.${currentEvent.id}`);
+    const vm=Object.fromEntries(vols.map(v=>[v.id,v]));
+    document.getElementById('balisage-list').innerHTML=balAsgns.map(a=>{
+      const pos=pm[a.position_id],vol=vm[a.volunteer_id],bs=bm[a.id];
+      const status=bs?.status||'non_commence';
+      const statusLabel={non_commence:'⚪ Non commencé',en_cours:'🟡 En cours',termine:'🟢 Terminé'}[status];
+      const statusClass={non_commence:'bal-non',en_cours:'bal-en',termine:'bal-ok'}[status];
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-weight:600">${esc(pos?.name||'—')}</div>
+          <div style="font-size:13px;color:var(--muted)">👤 ${esc(vol?.full_name||'—')}</div>
+          ${bs?.started_at?`<div style="font-size:12px;color:var(--muted)">Début : ${new Date(bs.started_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div>`:''}
+          ${bs?.finished_at?`<div style="font-size:12px;color:var(--green)">Terminé : ${new Date(bs.finished_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="${statusClass}" style="font-weight:600">${statusLabel}</span>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e){ errEl('balisage-list',e); }
+}
 
-    el.innerHTML = `<div class="table-wrap"><table>
-      <thead><tr><th>Bénévole</th><th>Poste</th><th>Contact</th><th>Statut</th><th>Répondu le</th></tr></thead>
-      <tbody>${tokens.map(t => {
-        const asgn = asgnMap[t.assignment_id];
-        const vol = asgn ? volMap[asgn.volunteer_id] : null;
-        const pos = asgn ? posMap[asgn.position_id] : null;
-        const conf = confMap[t.token];
-        const status = conf
-          ? conf.response === 'confirmed'
-            ? '<span class="badge badge-published">✅ Confirmé</span>'
-            : '<span class="badge" style="background:var(--red-dim); color:var(--red)">❌ Décliné</span>'
-          : '<span class="badge badge-draft">⏳ En attente</span>';
-        const date = conf?.responded_at ? new Date(conf.responded_at).toLocaleDateString('fr-FR') : '—';
+// ─── POINTAGE ─────────────────────────────────────────────────
+async function loadPointage() {
+  if (!currentEvent) return;
+  document.getElementById('pt-event-name').textContent=currentEvent.name;
+  try {
+    const [assignments,volunteers,positions]=await Promise.all([
+      get('assignments',`event_id=eq.${currentEvent.id}`),
+      get('volunteers',`event_id=eq.${currentEvent.id}`),
+      get('positions',`event_id=eq.${currentEvent.id}`)
+    ]);
+    const vm=Object.fromEntries(volunteers.map(v=>[v.id,v]));
+    const pm=Object.fromEntries(positions.map(p=>[p.id,p]));
+    const checkedIn=assignments.filter(a=>a.checked_in).length;
+    document.getElementById('pt-stats').innerHTML=`
+      <div class="stat-card"><div class="stat-value">${assignments.length}</div><div class="stat-label">Attendus</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--green)">${checkedIn}</div><div class="stat-label">✅ Présents</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--red)">${assignments.length-checkedIn}</div><div class="stat-label">⏳ Manquants</div></div>`;
+    document.getElementById('pointage-list').innerHTML=`<div class="table-wrap"><table>
+      <thead><tr><th>Bénévole</th><th>Poste</th><th>Statut</th><th>Heure</th><th>Action</th></tr></thead>
+      <tbody>${assignments.map(a=>{
+        const vol=vm[a.volunteer_id],pos=pm[a.position_id];
         return `<tr>
-          <td><b>${esc(vol?.full_name || '—')}</b></td>
-          <td>${esc(pos?.name || '—')}</td>
-          <td style="font-size:12px; color:var(--muted);">
-            ${vol?.email ? `📧 ${esc(vol.email)}` : ''}
-            ${vol?.phone ? `<br>📱 ${esc(vol.phone)}` : ''}
-          </td>
-          <td>${status}</td>
-          <td style="font-size:13px; color:var(--muted);">${date}</td>
+          <td><b>${esc(vol?.full_name||'—')}</b></td>
+          <td>${esc(pos?.name||'—')}</td>
+          <td>${a.checked_in?'<span class="badge badge-accepted">✅ Présent</span>':'<span class="badge badge-pending">⏳ Absent</span>'}</td>
+          <td style="font-size:13px;color:var(--muted)">${a.checked_in_at?new Date(a.checked_in_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—'}</td>
+          <td><button class="btn ${a.checked_in?'btn-danger':'btn-green'}" style="font-size:12px;padding:5px 10px" onclick="toggleCheckIn('${a.id}',${a.checked_in})">
+            ${a.checked_in?'↩ Annuler':'✅ Pointer'}
+          </button></td>
         </tr>`;
-      }).join('')}
-      </tbody></table></div>`;
-  } catch(e) { showError('confirmations-list', e); }
+      }).join('')}</tbody></table></div>`;
+  } catch(e){ errEl('pointage-list',e); }
+}
+
+async function toggleCheckIn(id, current) {
+  const val=!current;
+  await patch('assignments',`id=eq.${id}`,{checked_in:val,checked_in_at:val?new Date().toISOString():null});
+  toast(val?'Pointé !':'Pointage annulé','success'); loadPointage();
+}
+
+// ─── ADMIN USERS ──────────────────────────────────────────────
+let allUsers=[];
+async function loadAdminUsers() {
+  if (ME?.role!=='admin') return;
+  try {
+    allUsers=await get('profiles','order=created_at.desc');
+    renderUsers(allUsers);
+  } catch(e){ errEl('users-list',e); }
+}
+function renderUsers(users) {
+  document.getElementById('users-list').innerHTML=`<div class="table-wrap"><table>
+    <thead><tr><th>Nom</th><th>Email</th><th>Rôle</th><th>Inscrit le</th><th>Modifier rôle</th></tr></thead>
+    <tbody>${users.map(u=>`<tr>
+      <td><b>${esc(u.full_name||'—')}</b></td>
+      <td>${esc(u.email)}</td>
+      <td><span class="badge badge-${u.role==='admin'?'admin':u.role==='organisateur'||u.role==='co_organisateur'?'org':'benevole'}">${u.role}</span></td>
+      <td style="font-size:13px;color:var(--muted)">${new Date(u.created_at).toLocaleDateString('fr-FR')}</td>
+      <td><select onchange="changeRole('${u.id}',this.value)" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:6px;font-size:13px">
+        ${['benevole','co_organisateur','organisateur','admin'].map(r=>`<option value="${r}" ${r===u.role?'selected':''}>${r}</option>`).join('')}
+      </select></td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
+function filterUsers(){const q=document.getElementById('users-search').value.toLowerCase();renderUsers(allUsers.filter(u=>[(u.full_name||''),u.email].some(s=>s.toLowerCase().includes(q))))}
+async function changeRole(id,role){
+  if (!confirm(`Changer le rôle en "${role}" ?`)) return;
+  await patch('profiles',`id=eq.${id}`,{role}); toast('Rôle mis à jour','success'); loadAdminUsers();
+}
+
+// ─── ADMIN NOTIFS ─────────────────────────────────────────────
+async function loadAdminNotifs() {
+  const notifs=await get('notifications','order=created_at.desc&limit=50');
+  document.getElementById('notifs-list').innerHTML=notifs.length?`<div class="table-wrap"><table>
+    <thead><tr><th>Type</th><th>Destinataire</th><th>Objet</th><th>Statut</th><th>Date</th></tr></thead>
+    <tbody>${notifs.map(n=>`<tr>
+      <td><span class="badge badge-draft">${esc(n.type)}</span></td>
+      <td style="font-size:13px">${esc(n.email_to||'—')}</td>
+      <td style="font-size:13px">${esc(n.subject||'—')}</td>
+      <td><span class="badge badge-${n.status==='sent'?'accepted':n.status==='failed'?'declined':'pending'}">${n.status}</span></td>
+      <td style="font-size:12px;color:var(--muted)">${new Date(n.created_at).toLocaleDateString('fr-FR')}</td>
+    </tr>`).join('')}</tbody></table></div>`:emptyState('📧','Aucune notification');
+}
+async function processNotifs() {
+  toast('Traitement des emails... (connectez Resend pour envoi réel)','info');
+  const pending=await get('notifications','status=eq.pending');
+  for(const n of pending){await patch('notifications',`id=eq.${n.id}`,{status:'sent',sent_at:new Date().toISOString()});}
+  toast(`${pending.length} notification(s) traitée(s)`,'success'); loadAdminNotifs();
+}
+
+// ─── MESSAGES ─────────────────────────────────────────────────
+async function loadMessages() {
+  try {
+    const msgs=await get('messages','order=created_at.desc&limit=50');
+    if (!msgs.length) { document.getElementById('messages-list').innerHTML=emptyState('💬','Aucun message'); return; }
+    const sids=[...new Set(msgs.map(m=>m.sender_id))];
+    const senders=await get('profiles',`id=in.(${sids.join(',')})&select=id,full_name`);
+    const sm2=Object.fromEntries(senders.map(s=>[s.id,s]));
+    document.getElementById('messages-list').innerHTML=msgs.map(m=>`
+      <div style="padding:14px 0;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <b>${esc(sm2[m.sender_id]?.full_name||'—')}</b>
+          <span style="font-size:12px;color:var(--muted)">${new Date(m.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span>
+        </div>
+        <div style="font-size:14px">${esc(m.content)}</div>
+      </div>`).join('');
+  } catch(e){ errEl('messages-list',e); }
+}
+async function sendMessage() {
+  const content=v('msg-content'), eventId=v('msg-event-id')||null, recipientId=v('msg-recipient')||null;
+  if (!content) return toast('Entrez un message','error');
+  await post('messages',{sender_id:ME.id,event_id:eventId,recipient_id:recipientId,content});
+  closeModal('modal-message'); toast('Message envoyé !','success'); loadMessages();
 }
 
 // ─── UTILS ────────────────────────────────────────────────────
-function esc(str) {
-  if (!str) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function toast(msg, type = 'info') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = `show ${type}`;
-  setTimeout(() => t.className = '', 3000);
-}
-function showError(elId, err) {
-  const el = document.getElementById(elId);
-  if (el) el.innerHTML = `<div class="alert alert-error">Erreur : ${esc(err.message)}</div>`;
-}
-function setBtnLoading(id, loading) {
-  const btn = document.getElementById(id);
-  if (btn) btn.disabled = loading;
-}
-
-// ─── INIT ─────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-  showLogin();
-});
+const v  = id => document.getElementById(id)?.value||'';
+const sv = (id,val) => { const el=document.getElementById(id); if(el) el.value=val; };
+const show = id => { const el=document.getElementById(id); if(el) el.style.display='block'; };
+const hide = id => { const el=document.getElementById(id); if(el) el.style.display='none'; };
+function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
+function toast(msg,type='info'){const t=document.getElementById('toast');t.textContent=msg;t.className=`show ${type}`;setTimeout(()=>t.className='',3200)}
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function errEl(id,e){const el=document.getElementById(id);if(el)el.innerHTML=`<div class="alert alert-error">Erreur : ${esc(e.message)}</div>`}
+function setLoad(id,l){const b=document.getElementById(id);if(b)b.disabled=l}
+function authErr(id,msg,isErr=true){const el=document.getElementById(id);el.textContent=msg;el.style.display='block';el.className=isErr?'alert alert-error':'alert alert-info'}
+function emptyState(icon,txt,extra=''){return`<div class="empty-state"><div class="icon">${icon}</div><p>${txt}</p>${extra}</div>`}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
 </script>
 </body>
 </html>

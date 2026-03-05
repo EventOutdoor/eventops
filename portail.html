@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventOps — Portail Bénévoles</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --border:#E5E7EB;
+  --primary:#F97316; --pd:#EA6B0E;
+  --green:#16A34A; --gbg:#DCFCE7; --gborder:#86EFAC;
+  --red:#DC2626; --rbg:#FEE2E2; --rborder:#FCA5A5;
+  --blue:#2563EB; --bbg:#DBEAFE;
+  --yellow:#D97706; --ybg:#FEF3C7;
+  --text:#111827; --muted:#6B7280; --light:#F9FAFB;
+  --fh:'Syne',sans-serif; --fb:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100vh}
+
+/* HEADER */
+.header{background:#0D1117;color:white;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header-logo{font-family:var(--fh);font-size:16px;font-weight:800;color:var(--primary)}
+.header-user{display:flex;align-items:center;gap:10px;font-size:14px}
+.header-avatar{width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff}
+
+/* AUTH */
+#auth-screen{min-height:calc(100vh - 56px);display:flex;align-items:center;justify-content:center;padding:20px;
+  background:linear-gradient(135deg,#0D1117 0%,#1B2433 100%)}
+.auth-card{background:white;border-radius:16px;padding:40px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.auth-logo{font-family:var(--fh);font-size:22px;font-weight:800;color:var(--primary);margin-bottom:6px}
+.auth-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.auth-title{font-family:var(--fh);font-size:18px;font-weight:700;margin-bottom:20px}
+label{display:block;font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+input,select,textarea{width:100%;background:var(--light);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--fb);font-size:14px;padding:10px 14px;outline:none;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--primary)}
+.field{margin-bottom:14px}
+textarea{resize:vertical;min-height:80px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:8px;font-family:var(--fb);font-size:14px;font-weight:500;cursor:pointer;padding:10px 18px;transition:all .2s;width:100%}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--pd)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}.btn-ghost:hover{color:var(--text)}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:#15803D}
+.btn-outline-red{background:white;color:var(--red);border:2px solid #FECACA}.btn-outline-red:hover{background:var(--rbg)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-sm{padding:7px 14px;font-size:13px;width:auto}
+
+/* APP */
+#app{display:none}
+.container{max-width:680px;margin:0 auto;padding:24px 16px}
+
+/* TABS NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--border);display:flex;z-index:100}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px;cursor:pointer;color:var(--muted);font-size:11px;gap:3px;transition:color .15s;border:none;background:none;font-family:var(--fb)}
+.bn-item.active{color:var(--primary)}
+.bn-icon{font-size:20px}
+.page-content{padding-bottom:80px}
+
+/* SECTION TITLE */
+.section-title{font-family:var(--fh);font-size:20px;font-weight:800;margin-bottom:16px}
+
+/* EVENT CARDS */
+.event-card{background:white;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.event-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--primary)}
+.event-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.1);transform:translateY(-1px)}
+.event-name{font-family:var(--fh);font-size:18px;font-weight:700;margin-bottom:8px}
+.event-meta{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:500}
+.badge-open{background:#DCFCE7;color:#16A34A}
+.badge-full{background:#FEE2E2;color:#DC2626}
+.badge-pending{background:#FEF3C7;color:#D97706}
+.badge-accepted{background:#DCFCE7;color:#16A34A}
+.badge-declined{background:#FEE2E2;color:#DC2626}
+
+/* MISSION CARD */
+.mission-card{background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.mission-header{background:linear-gradient(135deg,#0D1117,#1B2433);color:white;padding:20px}
+.mission-event{font-size:12px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.mission-pos{font-family:var(--fh);font-size:22px;font-weight:800}
+.mission-body{padding:20px}
+.detail-row{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.detail-row:last-child{border-bottom:none}
+.detail-key{font-size:12px;color:var(--muted);width:80px;flex-shrink:0;padding-top:1px}
+.detail-val{font-size:14px;flex:1}
+
+/* STATUS */
+.status-card{border-radius:12px;padding:20px;text-align:center;margin-bottom:16px}
+.status-confirmed{background:var(--gbg);border:2px solid var(--gborder)}
+.status-declined{background:var(--rbg);border:2px solid var(--rborder)}
+.status-pending{background:var(--ybg);border:2px solid #FCD34D}
+.status-icon{font-size:48px;margin-bottom:10px}
+.status-title{font-family:var(--fh);font-size:20px;font-weight:800;margin-bottom:6px}
+.status-sub{font-size:14px;color:var(--muted)}
+
+/* BALISAGE */
+.bal-btn{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--light);border:1px solid var(--border);border-radius:10px;margin-bottom:10px}
+.bal-status{font-size:14px;font-weight:600}
+.bal-non{color:var(--muted)} .bal-en{color:var(--yellow)} .bal-ok{color:var(--green)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;display:none;align-items:flex-end;justify-content:center;padding:0}
+.modal-overlay.open{display:flex}
+.modal{background:white;border-radius:20px 20px 0 0;padding:28px 24px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+.modal-title{font-family:var(--fh);font-size:18px;font-weight:700;margin-bottom:20px}
+.modal-footer{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+
+/* LOADING */
+.loading{text-align:center;padding:60px 20px;color:var(--muted)}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* EMPTY */
+.empty{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty .icon{font-size:44px;margin-bottom:12px}
+
+/* TOAST */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:8px;font-size:14px;font-weight:500;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1}
+#toast.success{background:var(--green);color:#fff}
+#toast.error{background:var(--red);color:#fff}
+#toast.info{background:var(--blue);color:#fff}
+
+.alert{padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:14px}
+.alert-error{background:var(--rbg);color:var(--red);border:1px solid var(--rborder)}
+.alert-info{background:var(--bbg);color:var(--blue);border:1px solid #BFDBFE}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">⚡ EventOps Outdoor</div>
+  <div class="header-user" id="header-user" style="display:none">
+    <div class="header-avatar" id="header-avatar">?</div>
+    <span id="header-name" style="color:rgba(255,255,255,.8)"></span>
+  </div>
+</div>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div id="login-view" class="auth-card">
+    <div class="auth-logo">⚡ EventOps</div>
+    <div class="auth-sub">Portail bénévoles</div>
+    <div class="auth-title">Connexion</div>
+    <div id="auth-err" class="alert alert-error" style="display:none"></div>
+    <div class="field"><label>Email</label><input type="email" id="l-email" placeholder="vous@exemple.fr"></div>
+    <div class="field"><label>Mot de passe</label><input type="password" id="l-pwd" placeholder="••••••••"></div>
+    <button class="btn btn-primary" id="l-btn" onclick="login()" style="margin-bottom:12px">Se connecter</button>
+    <button class="btn btn-ghost" onclick="showReg()">Créer un compte bénévole</button>
+  </div>
+
+  <div id="reg-view" class="auth-card" style="display:none">
+    <div class="auth-logo">⚡ EventOps</div>
+    <div class="auth-sub">Créer un compte bénévole</div>
+    <div id="reg-err" class="alert alert-error" style="display:none"></div>
+    <div class="field"><label>Prénom et nom *</label><input type="text" id="r-name" placeholder="Jean Dupont"></div>
+    <div class="field"><label>Email *</label><input type="email" id="r-email" placeholder="jean@exemple.fr"></div>
+    <div class="field"><label>Téléphone</label><input type="tel" id="r-phone" placeholder="06 12 34 56 78"></div>
+    <div class="field"><label>Compétences / Notes</label><textarea id="r-skills" placeholder="PSC1, permis bateau, kayak de mer, véhicule..."></textarea></div>
+    <div class="field"><label>Mot de passe *</label><input type="password" id="r-pwd" placeholder="Min. 6 caractères"></div>
+    <button class="btn btn-primary" id="r-btn" onclick="register()" style="margin-bottom:12px">Créer mon compte</button>
+    <button class="btn btn-ghost" onclick="showLogin()">← Déjà un compte</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="page-content">
+
+    <!-- ÉVÉNEMENTS -->
+    <div id="page-events" style="display:none">
+      <div class="container">
+        <div class="section-title">Événements ouverts</div>
+        <div id="events-list"><div class="loading"><div class="spinner"></div>Chargement...</div></div>
+      </div>
+    </div>
+
+    <!-- MES MISSIONS -->
+    <div id="page-missions" style="display:none">
+      <div class="container">
+        <div class="section-title">Mes missions</div>
+        <div id="missions-list"><div class="loading"><div class="spinner"></div>Chargement...</div></div>
+      </div>
+    </div>
+
+    <!-- MES DEMANDES -->
+    <div id="page-requests" style="display:none">
+      <div class="container">
+        <div class="section-title">Mes demandes</div>
+        <div id="requests-list"></div>
+      </div>
+    </div>
+
+    <!-- MON PROFIL -->
+    <div id="page-profile" style="display:none">
+      <div class="container">
+        <div class="section-title">Mon profil</div>
+        <div style="background:white;border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px">
+          <div style="text-align:center;margin-bottom:20px">
+            <div style="width:64px;height:64px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:white;margin:0 auto 10px" id="profile-avatar">?</div>
+            <div style="font-family:var(--fh);font-size:20px;font-weight:700" id="profile-name"></div>
+            <div style="font-size:13px;color:var(--muted)" id="profile-email"></div>
+          </div>
+          <div class="field"><label>Nom complet</label><input type="text" id="p-name"></div>
+          <div class="field"><label>Téléphone</label><input type="tel" id="p-phone"></div>
+          <div class="field"><label>Compétences / Notes</label><textarea id="p-skills" placeholder="PSC1, permis bateau, kayak..."></textarea></div>
+          <button class="btn btn-primary" onclick="saveProfile()">Enregistrer</button>
+        </div>
+        <button class="btn btn-ghost" onclick="logout()" style="margin-top:8px">Déconnexion</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="bn-item active" id="bn-events" onclick="showTab('events')"><span class="bn-icon">🏅</span>Événements</button>
+    <button class="bn-item" id="bn-missions" onclick="showTab('missions')"><span class="bn-icon">📋</span>Mes missions</button>
+    <button class="bn-item" id="bn-requests" onclick="showTab('requests')"><span class="bn-icon">📬</span>Demandes</button>
+    <button class="bn-item" id="bn-profile" onclick="showTab('profile')"><span class="bn-icon">👤</span>Profil</button>
+  </nav>
+</div>
+
+<!-- MODAL ÉVÉNEMENT DÉTAIL -->
+<div class="modal-overlay" id="modal-event">
+  <div class="modal">
+    <div class="modal-title" id="me-title"></div>
+    <div id="me-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="me-request-btn" onclick="openRequestModal()">🙋 Je veux participer !</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-event')">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DEMANDE -->
+<div class="modal-overlay" id="modal-request">
+  <div class="modal">
+    <div class="modal-title">🙋 Demande de participation</div>
+    <input type="hidden" id="req-event-id">
+    <div style="font-size:14px;color:var(--muted);margin-bottom:16px" id="req-event-name"></div>
+    <div class="field"><label>Poste souhaité (optionnel)</label><select id="req-pos"><option value="">— Pas de préférence —</option></select></div>
+    <div class="field"><label>Créneau souhaité (optionnel)</label><select id="req-slot"><option value="">— Pas de préférence —</option></select></div>
+    <div class="field"><label>Message à l'organisateur</label><textarea id="req-msg" placeholder="Présentez-vous, indiquez vos disponibilités, compétences..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-green" onclick="submitRequest()">Envoyer ma demande</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-request')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL BALISAGE -->
+<div class="modal-overlay" id="modal-balisage">
+  <div class="modal">
+    <div class="modal-title">🚩 Statut du balisage</div>
+    <input type="hidden" id="bal-asgn-id">
+    <div style="font-size:15px;font-weight:600;margin-bottom:16px" id="bal-pos-name"></div>
+    <div id="bal-status-display" style="margin-bottom:16px"></div>
+    <div class="field"><label>Notes (optionnel)</label><textarea id="bal-notes" placeholder="Difficultés rencontrées, météo, signalement..."></textarea></div>
+    <div class="modal-footer" id="bal-actions"></div>
+  </div>
+</div>
+
+<!-- MODAL TOKEN (accès direct par lien) -->
+<div id="token-view" style="display:none">
+  <div style="min-height:100vh;background:var(--bg);padding:20px">
+    <div style="max-width:520px;margin:0 auto">
+      <div id="token-content"><div class="loading"><div class="spinner"></div>Chargement de votre mission...</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SB_URL='https://zchybozcpzelmjqymudp.supabase.co';
+const SB_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjaHlib3pjcHplbG1qcXltdWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDE2MDAsImV4cCI6MjA4ODIxNzYwMH0.N2qnJgMNq5PzQ_42Pd7vgf47GmWVEQ8pBHMLKelLEp8';
+let SESSION=null, ME=null;
+let currentEventData=null;
+
+// ─── API ──────────────────────────────────────────────────────
+async function api(path,method='GET',body=null){
+  const h={'apikey':SB_ANON,'Authorization':`Bearer ${SESSION||SB_ANON}`,'Content-Type':'application/json','Prefer':'return=representation'};
+  const r=await fetch(SB_URL+path,{method,headers:h,body:body?JSON.stringify(body):null});
+  const t=await r.text(); if(!r.ok) throw new Error(t);
+  return t?JSON.parse(t):[];
+}
+const get=(t,q='')=>api(`/rest/v1/${t}?${q}`);
+const post=(t,d)=>api(`/rest/v1/${t}`,'POST',d);
+const patch=(t,q,d)=>api(`/rest/v1/${t}?${q}`,'PATCH',d);
+
+// ─── AUTH ──────────────────────────────────────────────────────
+async function login(){
+  const email=v('l-email'), pwd=v('l-pwd');
+  if(!email||!pwd) return err('auth-err','Remplissez tous les champs');
+  dis('l-btn',true);
+  try{
+    const r=await fetch(`${SB_URL}/auth/v1/token?grant_type=password`,{method:'POST',headers:{'apikey':SB_ANON,'Content-Type':'application/json'},body:JSON.stringify({email,password:pwd})});
+    const d=await r.json(); if(!r.ok) throw new Error(d.error_description||'Erreur');
+    SESSION=d.access_token;
+    await loadMe(d.user.id,email);
+    startApp();
+  }catch(e){err('auth-err',e.message);}
+  finally{dis('l-btn',false);}
+}
+
+async function register(){
+  const name=v('r-name'),email=v('r-email'),pwd=v('r-pwd'),phone=v('r-phone'),skills=v('r-skills');
+  if(!name||!email||!pwd) return err('reg-err','Nom, email et mot de passe obligatoires');
+  if(pwd.length<6) return err('reg-err','Mot de passe trop court');
+  dis('r-btn',true);
+  try{
+    const r=await fetch(`${SB_URL}/auth/v1/signup`,{method:'POST',headers:{'apikey':SB_ANON,'Content-Type':'application/json'},body:JSON.stringify({email,password:pwd,data:{full_name:name}})});
+    const d=await r.json(); if(!r.ok) throw new Error(d.msg||'Erreur');
+    if(d.access_token){
+      SESSION=d.access_token;
+      await loadMe(d.user.id,email,name,phone,skills);
+      startApp();
+    }else{
+      err('reg-err','✅ Compte créé ! Vérifiez votre email puis connectez-vous.',false);
+      setTimeout(showLogin,2500);
+    }
+  }catch(e){err('reg-err',e.message);}
+  finally{dis('r-btn',false);}
+}
+
+async function loadMe(uid,email,name='',phone='',skills=''){
+  try{
+    const rows=await get('profiles',`id=eq.${uid}`);
+    if(rows.length){ME=rows[0];}
+    else{
+      const data={id:uid,email,full_name:name||email,phone:phone||null,skills:skills||null,role:'benevole'};
+      const ins=await post('profiles',data); ME=Array.isArray(ins)?ins[0]:ins;
+    }
+    if((name||phone||skills)&&ME){
+      const upd={}; if(name&&!ME.full_name) upd.full_name=name; if(phone) upd.phone=phone; if(skills) upd.skills=skills;
+      if(Object.keys(upd).length){await patch('profiles',`id=eq.${uid}`,upd); Object.assign(ME,upd);}
+    }
+  }catch(e){ME={id:uid,email,role:'benevole',full_name:name||email};}
+}
+
+function startApp(){
+  // Si organisateur/admin → rediriger vers backoffice
+  if(ME?.role==='admin'||ME?.role==='organisateur'||ME?.role==='co_organisateur'){
+    window.location.href='index.html'; return;
+  }
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('header-user').style.display='flex';
+  document.getElementById('header-name').textContent=ME?.full_name?.split(' ')[0]||'';
+  document.getElementById('header-avatar').textContent=(ME?.full_name||'?')[0].toUpperCase();
+  // Charger profil form
+  sv('p-name',ME?.full_name||'');sv('p-phone',ME?.phone||'');sv('p-skills',ME?.skills||'');
+  document.getElementById('profile-name').textContent=ME?.full_name||'';
+  document.getElementById('profile-email').textContent=ME?.email||'';
+  document.getElementById('profile-avatar').textContent=(ME?.full_name||'?')[0].toUpperCase();
+  showTab('events');
+}
+
+function logout(){SESSION=null;ME=null;document.getElementById('app').style.display='none';document.getElementById('auth-screen').style.display='flex';showLogin();}
+function showLogin(){show('login-view');hide('reg-view');hide('token-view')}
+function showReg(){hide('login-view');show('reg-view');}
+
+// ─── TABS ──────────────────────────────────────────────────────
+function showTab(tab){
+  ['events','missions','requests','profile'].forEach(t=>{
+    const p=document.getElementById('page-'+t);
+    const b=document.getElementById('bn-'+t);
+    if(p) p.style.display=t===tab?'block':'none';
+    if(b) b.classList.toggle('active',t===tab);
+  });
+  const fn={events:loadEvents,missions:loadMissions,requests:loadMyRequests,profile:()=>{}};
+  if(fn[tab]) fn[tab]();
+}
+
+// ─── EVENTS ────────────────────────────────────────────────────
+async function loadEvents(){
+  try{
+    const events=await get('events','status=eq.publié&is_public=eq.true&order=start_date.asc');
+    const el=document.getElementById('events-list');
+    if(!events.length){el.innerHTML=empty('🏅','Aucun événement ouvert pour le moment.');return;}
+    // Check requests
+    const myReqs=await get('volunteer_requests',`volunteer_id=eq.${ME.id}`);
+    const myReqMap=Object.fromEntries(myReqs.map(r=>[r.event_id,r]));
+    el.innerHTML=events.map(e=>{
+      const d=e.start_date?new Date(e.start_date).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}):'—';
+      const req=myReqMap[e.id];
+      const statusBadge=req?`<span class="badge badge-${req.status==='accepted'?'accepted':req.status==='declined'?'declined':'pending'}">${{pending:'⏳ Demande envoyée',accepted:'✅ Accepté',declined:'❌ Non retenu'}[req.status]}</span>`:
+        `<span class="badge badge-open">🙋 Inscriptions ouvertes</span>`;
+      return `<div class="event-card" onclick="openEventModal('${e.id}')">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+          <div class="event-name">${esc(e.name)}</div>${statusBadge}
+        </div>
+        <div class="event-meta">
+          <div>📅 ${d}</div>
+          <div>📍 ${esc(e.location||'—')}</div>
+          ${e.registration_deadline?`<div style="color:${new Date(e.registration_deadline)<new Date()?'var(--red)':'inherit'}">⏰ Inscriptions jusqu'au ${new Date(e.registration_deadline).toLocaleDateString('fr-FR')}</div>`:''}
+          ${e.max_volunteers?`<div>👥 Max ${e.max_volunteers} bénévoles</div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){document.getElementById('events-list').innerHTML=empty('❌','Erreur : '+e.message);}
+}
+
+async function openEventModal(eventId){
+  const [event]=await get('events',`id=eq.${eventId}`);
+  if(!event) return;
+  currentEventData=event;
+  const positions=await get('positions',`event_id=eq.${eventId}&order=name.asc`);
+  const myReqs=await get('volunteer_requests',`volunteer_id=eq.${ME.id}&event_id=eq.${eventId}`);
+  const hasRequest=myReqs.length>0;
+  document.getElementById('me-title').textContent=event.name;
+  const d=event.start_date?new Date(event.start_date).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'';
+  document.getElementById('me-body').innerHTML=`
+    <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${esc(event.description||'')}</div>
+    ${d?`<div style="display:flex;gap:8px;margin-bottom:8px"><span>📅</span><span>${d}</span></div>`:''}
+    ${event.location?`<div style="display:flex;gap:8px;margin-bottom:8px"><span>📍</span><span>${esc(event.location)}</span></div>`:''}
+    ${event.contact_email?`<div style="display:flex;gap:8px;margin-bottom:8px"><span>📧</span><span>${esc(event.contact_email)}</span></div>`:''}
+    ${positions.length?`<div style="margin-top:16px"><div style="font-weight:600;margin-bottom:10px">Postes disponibles :</div>
+      ${positions.map(p=>`<div style="background:var(--light);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:6px;font-size:14px">
+        <b>${esc(p.name)}</b> <span style="font-size:12px;color:var(--muted)">${p.required_count||1} bénévole(s)</span>
+        ${p.description?`<div style="font-size:12px;color:var(--muted);margin-top:3px">${esc(p.description)}</div>`:''}
+      </div>`).join('')}</div>`:''}
+    ${hasRequest?`<div style="margin-top:14px"><span class="badge badge-${myReqs[0].status==='accepted'?'accepted':myReqs[0].status==='declined'?'declined':'pending'}">
+      ${myReqs[0].status==='pending'?'⏳ Demande en attente':myReqs[0].status==='accepted'?'✅ Participation acceptée':'❌ Non retenu cette fois'}
+    </span></div>`:''}`;
+  const btn=document.getElementById('me-request-btn');
+  if(hasRequest){btn.style.display='none';}else{btn.style.display='flex';}
+  openModal('modal-event');
+}
+
+function openRequestModal(){
+  if(!currentEventData) return;
+  closeModal('modal-event');
+  sv('req-event-id',currentEventData.id);
+  document.getElementById('req-event-name').textContent=`📅 ${currentEventData.name}`;
+  // Load positions
+  get('positions',`event_id=eq.${currentEventData.id}&order=name.asc`).then(pos=>{
+    document.getElementById('req-pos').innerHTML='<option value="">— Pas de préférence —</option>'+pos.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  });
+  openModal('modal-request');
+}
+
+document.getElementById('req-pos').addEventListener('change',async function(){
+  const posId=this.value;
+  const rs=document.getElementById('req-slot');
+  if(!posId){rs.innerHTML='<option value="">— Pas de préférence —</option>';return;}
+  const slots=await get('position_slots',`position_id=eq.${posId}`);
+  rs.innerHTML='<option value="">— Pas de préférence —</option>'+slots.map(s=>`<option value="${s.id}">${esc(s.label||'')} ${s.start_time?s.start_time.substring(0,5):''} ${s.end_time?'→ '+s.end_time.substring(0,5):''}</option>`).join('');
+});
+
+async function submitRequest(){
+  const eventId=v('req-event-id'),posId=v('req-pos')||null,slotId=v('req-slot')||null,msg=v('req-msg')||null;
+  if(!eventId) return;
+  try{
+    await post('volunteer_requests',{event_id:eventId,volunteer_id:ME.id,status:'pending',message:msg,position_id:posId,slot_id:slotId});
+    closeModal('modal-request'); toast('Demande envoyée ! 🎉','success'); loadEvents();
+  }catch(e){
+    if(e.message.includes('duplicate')||e.message.includes('unique')) toast('Vous avez déjà envoyé une demande pour cet événement','error');
+    else toast('Erreur : '+e.message,'error');
+  }
+}
+
+// ─── MISSIONS ──────────────────────────────────────────────────
+async function loadMissions(){
+  const el=document.getElementById('missions-list');
+  el.innerHTML='<div class="loading"><div class="spinner"></div>Chargement...</div>';
+  try{
+    // Via tokens (ancien système)
+    const tokens=await get('invite_tokens','');
+    // Via assignments (nouveau système - chercher par email dans volunteers)
+    const myVols=await get('volunteers',`email=eq.${ME.email}`);
+    const myVolIds=myVols.map(v=>v.id);
+    let assignments=[];
+    if(myVolIds.length){
+      assignments=await get('assignments',`volunteer_id=in.(${myVolIds.join(',')})`);
+    }
+    if(!assignments.length&&!tokens.length){
+      el.innerHTML=empty('📋','Aucune mission assignée pour le moment.','<p style="font-size:13px">Participez à des événements pour voir vos missions ici.</p>');
+      return;
+    }
+    const missionCards=[];
+    for(const a of assignments){
+      const [event]=await get('events',`id=eq.${a.event_id}`);
+      const [pos]=await get('positions',`id=eq.${a.position_id}`);
+      const conf=await get('confirmations',`token=in.(SELECT token FROM invite_tokens WHERE assignment_id=eq.${a.id})`).catch(()=>[]);
+      let slot=null; if(a.slot_id){const s=await get('position_slots',`id=eq.${a.slot_id}`);slot=s[0];}
+      const balStat=await get('balisage_status',`assignment_id=eq.${a.id}`).then(r=>r[0]).catch(()=>null);
+      missionCards.push(renderMissionCard(event,pos,slot,a,balStat));
+    }
+    el.innerHTML=missionCards.length?missionCards.join(''):empty('📋','Aucune mission pour le moment.');
+  }catch(e){el.innerHTML=empty('❌','Erreur : '+e.message);}
+}
+
+function renderMissionCard(event,pos,slot,assignment,balStat){
+  if(!event||!pos) return '';
+  const d=event.start_date?new Date(event.start_date).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'';
+  const slotStr=slot?`${slot.label||''} ${slot.start_time?slot.start_time.substring(0,5):''} ${slot.end_time?'→ '+slot.end_time.substring(0,5):''}`.trim():'';
+  const isBalisage=(pos.type||'').toLowerCase()==='balisage';
+  const bs=balStat?.status||'non_commence';
+  const balLabel={non_commence:'⚪ Non commencé',en_cours:'🟡 En cours',termine:'🟢 Terminé'}[bs];
+  return `<div class="mission-card">
+    <div class="mission-header">
+      <div class="mission-event">📅 ${esc(event.name)}</div>
+      <div class="mission-pos">📍 ${esc(pos.name)}</div>
+      ${d?`<div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:6px">${d}</div>`:''}
+    </div>
+    <div class="mission-body">
+      ${slotStr?`<div class="detail-row"><div class="detail-key">Créneau</div><div class="detail-val">⏰ <b>${esc(slotStr)}</b></div></div>`:''}
+      ${event.location?`<div class="detail-row"><div class="detail-key">Lieu</div><div class="detail-val">📍 ${esc(event.location)}</div></div>`:''}
+      ${pos.description?`<div class="detail-row"><div class="detail-key">Instructions</div><div class="detail-val">${esc(pos.description)}</div></div>`:''}
+      ${pos.material?`<div class="detail-row"><div class="detail-key">Matériel</div><div class="detail-val">🎒 ${esc(pos.material)}</div></div>`:''}
+      ${event.contact_phone?`<div class="detail-row"><div class="detail-key">Contact</div><div class="detail-val">📞 ${esc(event.contact_phone)}</div></div>`:''}
+      ${assignment.notes?`<div class="detail-row"><div class="detail-key">Note org.</div><div class="detail-val">${esc(assignment.notes)}</div></div>`:''}
+      ${isBalisage?`<div style="margin-top:14px">
+        <div class="bal-btn">
+          <div><div style="font-weight:600;font-size:14px">Statut balisage</div><div class="bal-${bs==='non_commence'?'non':bs==='en_cours'?'en':'ok'}">${balLabel}</div></div>
+          <button class="btn btn-primary btn-sm" onclick="openBalisageModal('${assignment.id}','${esc(pos.name)}')">Mettre à jour</button>
+        </div>
+      </div>`:''}
+    </div>
+  </div>`;
+}
+
+// ─── BALISAGE ──────────────────────────────────────────────────
+async function openBalisageModal(asgnId,posName){
+  sv('bal-asgn-id',asgnId);
+  document.getElementById('bal-pos-name').textContent=posName;
+  const rows=await get('balisage_status',`assignment_id=eq.${asgnId}`);
+  const bs=rows[0];
+  const status=bs?.status||'non_commence';
+  const asgn=await get('assignments',`id=eq.${asgnId}`).then(r=>r[0]);
+  document.getElementById('bal-status-display').innerHTML=`<div style="text-align:center;padding:14px;background:var(--light);border-radius:10px;font-size:16px;font-weight:600">
+    ${{non_commence:'⚪ Non commencé',en_cours:'🟡 En cours',termine:'🟢 Terminé'}[status]}
+    ${bs?.started_at?`<div style="font-size:12px;color:var(--muted);font-weight:400;margin-top:4px">Début : ${new Date(bs.started_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div>`:''}
+  </div>`;
+  const actions=document.getElementById('bal-actions');
+  if(status==='non_commence'){
+    actions.innerHTML=`<button class="btn btn-primary" onclick="updateBalisage('${asgnId}','en_cours')">🚩 Démarrer le balisage</button><button class="btn btn-ghost" onclick="closeModal('modal-balisage')">Fermer</button>`;
+  }else if(status==='en_cours'){
+    actions.innerHTML=`<button class="btn btn-green" onclick="updateBalisage('${asgnId}','termine')">✅ Balisage terminé</button><button class="btn btn-ghost" onclick="closeModal('modal-balisage')">Fermer</button>`;
+  }else{
+    actions.innerHTML=`<button class="btn btn-ghost" onclick="closeModal('modal-balisage')">Fermer</button>`;
+  }
+  sv('bal-notes','');
+  openModal('modal-balisage');
+}
+
+async function updateBalisage(asgnId,newStatus){
+  const notes=v('bal-notes')||null;
+  const now=new Date().toISOString();
+  const rows=await get('balisage_status',`assignment_id=eq.${asgnId}`);
+  const data={status:newStatus,updated_at:now,notes};
+  if(newStatus==='en_cours') data.started_at=now;
+  if(newStatus==='termine') data.finished_at=now;
+  const asgn=await get('assignments',`id=eq.${asgnId}`).then(r=>r[0]);
+  if(rows.length){await patch('balisage_status',`assignment_id=eq.${asgnId}`,data);}
+  else{await post('balisage_status',{assignment_id:asgnId,event_id:asgn.event_id,...data});}
+  closeModal('modal-balisage');
+  toast(newStatus==='en_cours'?'Balisage démarré ! 🚩':'Balisage terminé ! ✅','success');
+  loadMissions();
+}
+
+// ─── MY REQUESTS ───────────────────────────────────────────────
+async function loadMyRequests(){
+  try{
+    const reqs=await get('volunteer_requests',`volunteer_id=eq.${ME.id}&order=created_at.desc`);
+    if(!reqs.length){document.getElementById('requests-list').innerHTML=empty('📬','Aucune demande envoyée','<p style="font-size:13px">Parcourez les événements et cliquez sur "Je veux participer !"</p>');return;}
+    const eids=[...new Set(reqs.map(r=>r.event_id))];
+    const events=await get('events',`id=in.(${eids.join(',')})&select=id,name,start_date`);
+    const em=Object.fromEntries(events.map(e=>[e.id,e]));
+    document.getElementById('requests-list').innerHTML=reqs.map(r=>{
+      const event=em[r.event_id];
+      const d=event?.start_date?new Date(event.start_date).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}):'';
+      const statusText={pending:'⏳ En attente de réponse',accepted:'✅ Participation acceptée !',declined:'❌ Non retenu cette fois'}[r.status];
+      return `<div class="event-card" style="cursor:default">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+          <div class="event-name" style="font-size:16px">${esc(event?.name||'—')}</div>
+          <span class="badge badge-${r.status==='accepted'?'accepted':r.status==='declined'?'declined':'pending'}">${r.status==='pending'?'⏳':r.status==='accepted'?'✅':'❌'}</span>
+        </div>
+        ${d?`<div style="font-size:13px;color:var(--muted);margin-bottom:6px">📅 ${d}</div>`:''}
+        <div style="font-size:14px;font-weight:500;margin-bottom:4px">${statusText}</div>
+        ${r.message?`<div style="font-size:13px;color:var(--muted);font-style:italic">"${esc(r.message)}"</div>`:''}
+        ${r.response_note?`<div style="font-size:13px;color:var(--green);margin-top:6px">💬 ${esc(r.response_note)}</div>`:''}
+        <div style="font-size:12px;color:var(--muted);margin-top:8px">${new Date(r.created_at).toLocaleDateString('fr-FR')}</div>
+      </div>`;
+    }).join('');
+  }catch(e){document.getElementById('requests-list').innerHTML=empty('❌','Erreur : '+e.message);}
+}
+
+// ─── PROFILE ───────────────────────────────────────────────────
+async function saveProfile(){
+  const name=v('p-name'),phone=v('p-phone'),skills=v('p-skills');
+  try{
+    await patch('profiles',`id=eq.${ME.id}`,{full_name:name||null,phone:phone||null,skills:skills||null});
+    ME.full_name=name; ME.phone=phone; ME.skills=skills;
+    document.getElementById('profile-name').textContent=name;
+    document.getElementById('header-name').textContent=name.split(' ')[0];
+    document.getElementById('header-avatar').textContent=(name||'?')[0].toUpperCase();
+    document.getElementById('profile-avatar').textContent=(name||'?')[0].toUpperCase();
+    toast('Profil enregistré !','success');
+  }catch(e){toast('Erreur : '+e.message,'error');}
+}
+
+// ─── TOKEN DIRECT ACCESS ───────────────────────────────────────
+async function loadTokenView(token){
+  hide('auth-screen'); hide('app');
+  show('token-view');
+  try{
+    const rows=await get('invite_tokens',`token=eq.${token}`);
+    if(!rows.length){document.getElementById('token-content').innerHTML=`<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:16px">❌</div><div style="font-size:20px;font-weight:700;color:var(--red)">Lien invalide</div><p style="color:var(--muted);margin-top:8px">Ce lien n'existe pas ou a expiré.</p></div>`;return;}
+    const tokenRow=rows[0];
+    const [asgn]=await get('assignments',`id=eq.${tokenRow.assignment_id}`);
+    const [event]=await get('events',`id=eq.${tokenRow.event_id}`);
+    const [vol]=await get('volunteers',`id=eq.${asgn.volunteer_id}`);
+    const [pos]=await get('positions',`id=eq.${asgn.position_id}`);
+    let slot=null; if(asgn.slot_id){const s=await get('position_slots',`id=eq.${asgn.slot_id}`);slot=s[0];}
+    const existing=await get('confirmations',`token=eq.${token}`);
+    const d=event?.start_date?new Date(event.start_date).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'';
+    const slotStr=slot?`⏰ ${slot.label||''} ${slot.start_time?slot.start_time.substring(0,5):''} ${slot.end_time?'→ '+slot.end_time.substring(0,5):''}`.trim():'';
+    document.getElementById('token-content').innerHTML=`
+      <div class="mission-card">
+        <div class="mission-header">
+          <div class="mission-event">📅 ${esc(event?.name||'—')}</div>
+          <div class="mission-pos">📍 ${esc(pos?.name||'—')}</div>
+          ${d?`<div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:6px">${d}</div>`:''}
+        </div>
+        <div class="mission-body">
+          ${slotStr?`<div class="detail-row"><div class="detail-key">Créneau</div><div class="detail-val"><b>${esc(slotStr)}</b></div></div>`:''}
+          ${event?.location?`<div class="detail-row"><div class="detail-key">Lieu</div><div class="detail-val">📍 ${esc(event.location)}</div></div>`:''}
+          ${pos?.description?`<div class="detail-row"><div class="detail-key">Instructions</div><div class="detail-val">${esc(pos.description)}</div></div>`:''}
+          ${pos?.material?`<div class="detail-row"><div class="detail-key">Matériel</div><div class="detail-val">🎒 ${esc(pos.material)}</div></div>`:''}
+          ${event?.contact_phone?`<div class="detail-row"><div class="detail-key">Contact</div><div class="detail-val">📞 ${esc(event.contact_phone)}</div></div>`:''}
+        </div>
+      </div>
+      <div id="confirm-area"></div>`;
+    const ca=document.getElementById('confirm-area');
+    if(existing.length){
+      ca.innerHTML=existing[0].response==='confirmed'?
+        `<div class="status-card status-confirmed"><div class="status-icon">✅</div><div class="status-title">Merci ${esc((vol?.full_name||'').split(' ')[0])} !</div><div class="status-sub">Présence confirmée.</div></div>`:
+        `<div class="status-card status-declined"><div class="status-icon">💙</div><div class="status-title">Réponse enregistrée</div><div class="status-sub">Merci pour votre retour.</div></div>`;
+    }else{
+      ca.innerHTML=`<div style="padding:20px 0">
+        <div style="font-family:var(--fh);font-size:18px;font-weight:700;margin-bottom:6px">Confirmez votre présence</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:20px">Votre réponse aide l'organisateur à finaliser l'événement.</div>
+        <button class="btn btn-green" style="margin-bottom:10px" onclick="tokenConfirm('${token}','confirmed')">✅ Je confirme ma présence</button>
+        <button class="btn btn-outline-red" onclick="tokenConfirm('${token}','declined')">Je ne serai pas disponible</button>
+      </div>`;
+    }
+  }catch(e){document.getElementById('token-content').innerHTML=`<div style="text-align:center;padding:40px;color:var(--red)">Erreur : ${esc(e.message)}</div>`;}
+}
+
+async function tokenConfirm(token,response){
+  const btns=document.querySelectorAll('#confirm-area .btn');
+  btns.forEach(b=>b.disabled=true);
+  try{
+    const existing=await get('confirmations',`token=eq.${token}`);
+    if(existing.length) await patch('confirmations',`token=eq.${token}`,{response,responded_at:new Date().toISOString()});
+    else await post('confirmations',{token,response,responded_at:new Date().toISOString()});
+    document.getElementById('confirm-area').innerHTML=response==='confirmed'?
+      `<div class="status-card status-confirmed"><div class="status-icon">✅</div><div class="status-title">Parfait, à bientôt !</div><div class="status-sub">Présence confirmée.</div></div>`:
+      `<div class="status-card status-declined"><div class="status-icon">💙</div><div class="status-title">Réponse enregistrée</div><div class="status-sub">Merci pour votre retour.</div></div>`;
+  }catch(e){btns.forEach(b=>b.disabled=false);alert('Erreur, réessayez.');}
+}
+
+// ─── UTILS ────────────────────────────────────────────────────
+const v=id=>document.getElementById(id)?.value||'';
+const sv=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val};
+const show=id=>{const el=document.getElementById(id);if(el)el.style.display='block'};
+const hide=id=>{const el=document.getElementById(id);if(el)el.style.display='none'};
+const dis=(id,d)=>{const b=document.getElementById(id);if(b)b.disabled=d};
+function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
+function toast(msg,type='info'){const t=document.getElementById('toast');t.textContent=msg;t.className=`show ${type}`;setTimeout(()=>t.className='',3200)}
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function empty(icon,txt,extra=''){return`<div class="empty"><div class="icon">${icon}</div><p>${txt}</p>${extra}</div>`}
+function err(id,msg,isErr=true){const el=document.getElementById(id);el.textContent=msg;el.style.display='block';el.className=isErr?'alert alert-error':'alert alert-info'}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+
+// ─── INIT ─────────────────────────────────────────────────────
+const params=new URLSearchParams(window.location.search);
+const token=params.get('token');
+if(token){
+  loadTokenView(token);
+}else{
+  showLogin();
+}
+</script>
+</body>
+</html>
