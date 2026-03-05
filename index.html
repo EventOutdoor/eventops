@@ -362,6 +362,11 @@
         </button>
       </div>
     </div>
+      <div class="nav-sep" id="admin-users-sep" style="display:none"></div>
+      <button class="nav-item" onclick="showPage('admin-users')" id="nav-admin-users" style="display:none">
+        <span class="icon">⚙️</span> Utilisateurs
+      </button>
+    </div>
     <div class="sidebar-footer">
       <div class="user-info" id="user-email-display"></div>
       <button class="btn btn-ghost" style="width:100%; justify-content:center; font-size:13px;" onclick="logout()">Déconnexion</button>
@@ -750,6 +755,7 @@ function showPage(page) {
     assignments: loadAssignments,
     confirmations: loadConfirmations,
     organizers: loadOrganizers,
+    'admin-users': loadAdminUsers,
   };
   if (handlers[page]) handlers[page]();
 }
@@ -1323,9 +1329,10 @@ async function loadUserProfile(uid) {
 
 function applyRoleUI() {
   const isAdmin = currentUserRole === 'admin';
-  // Afficher nav organisateurs seulement si admin
   document.getElementById('admin-sep').style.display = isAdmin ? 'block' : 'none';
   document.getElementById('nav-organizers').style.display = isAdmin ? 'flex' : 'none';
+  document.getElementById('admin-users-sep').style.display = isAdmin ? 'block' : 'none';
+  document.getElementById('nav-admin-users').style.display = isAdmin ? 'flex' : 'none';
 }
 
 async function getMyEvents() {
@@ -1399,6 +1406,68 @@ async function removeOrganizer(linkId) {
   await sbDelete('event_organizers', `id=eq.${linkId}`);
   toast('Co-organisateur retiré', 'info');
   loadOrganizers();
+}
+
+// ─── ADMIN USERS ─────────────────────────────────────────────
+let _allUsers = [];
+
+async function loadAdminUsers() {
+  try {
+    _allUsers = await sbGet('profiles', 'order=created_at.desc');
+    renderAdminUsers(_allUsers);
+  } catch(e) { showError('admin-users-list', e); }
+}
+
+function renderAdminUsers(users) {
+  const el = document.getElementById('admin-users-list');
+  if (!users.length) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">👤</div><p>Aucun utilisateur trouvé.</p></div>';
+    return;
+  }
+  el.innerHTML = `<div class="table-wrap"><table>
+    <thead><tr><th>Email</th><th>Rôle actuel</th><th>Inscrit le</th><th>Changer le rôle</th></tr></thead>
+    <tbody>${users.map(u => `
+      <tr>
+        <td><b>${esc(u.email)}</b>${u.id === currentUser?.id ? ' <span class="badge badge-draft">vous</span>' : ''}</td>
+        <td>
+          <span class="badge ${u.role === 'admin' ? 'badge-published' : 'badge-draft'}">
+            ${u.role === 'admin' ? '⚡ Admin' : '🎯 Organisateur'}
+          </span>
+        </td>
+        <td style="font-size:13px; color:var(--muted);">${new Date(u.created_at).toLocaleDateString('fr-FR')}</td>
+        <td>
+          ${u.id === currentUser?.id
+            ? '<span style="font-size:12px; color:var(--muted);">— (votre compte)</span>'
+            : `<select onchange="changeUserRole('${u.id}', this.value)"
+                style="background:var(--surface2); border:1px solid var(--border); color:var(--text);
+                       padding:6px 10px; border-radius:6px; font-size:13px; font-family:var(--font-body);">
+                <option value="organisateur" ${u.role === 'organisateur' ? 'selected' : ''}>🎯 Organisateur</option>
+                <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>⚡ Admin</option>
+              </select>`
+          }
+        </td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+}
+
+function filterAdminUsers() {
+  const q = document.getElementById('users-search').value.toLowerCase();
+  renderAdminUsers(_allUsers.filter(u => (u.email || '').toLowerCase().includes(q)));
+}
+
+async function changeUserRole(userId, newRole) {
+  if (!confirm(`Changer le rôle en "${newRole}" pour cet utilisateur ?`)) {
+    loadAdminUsers(); // reset le select
+    return;
+  }
+  try {
+    await sbPatch('profiles', `id=eq.${userId}`, { role: newRole });
+    toast(`Rôle mis à jour : ${newRole}`, 'success');
+    loadAdminUsers();
+  } catch(e) {
+    toast('Erreur : ' + e.message, 'error');
+    loadAdminUsers();
+  }
 }
 
 // ─── INIT ─────────────────────────────────────────────────────
